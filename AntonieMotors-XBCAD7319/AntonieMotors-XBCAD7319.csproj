@@ -25,6 +25,10 @@
 
   <ItemGroup>
     <None Include="Views\Shared\_Template.cshtml" />
+    <None Include="wwwroot\Images\orangebus.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\Images\regbg.jpg" />
   </ItemGroup>
 
 </Project>
