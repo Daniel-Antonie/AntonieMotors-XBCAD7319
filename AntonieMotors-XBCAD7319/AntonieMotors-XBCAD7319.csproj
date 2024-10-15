@@ -7,4 +7,24 @@
     <RootNamespace>AntonieMotors_XBCAD7319</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Content Remove="Views\Shared\_Template.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\Shared\_Template.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="Views\Shared\_Template.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Views\Shared\_Template.cshtml" />
+  </ItemGroup>
+
 </Project>
