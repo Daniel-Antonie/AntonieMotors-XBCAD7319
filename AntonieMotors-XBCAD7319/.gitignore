@@ -39,3 +39,5 @@ publish/
 
 # Package output
 *.nupkg
+
+#Testing changes
