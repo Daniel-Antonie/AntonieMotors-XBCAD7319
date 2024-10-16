@@ -28,7 +28,7 @@ namespace AntonieMotors_XBCAD7319
 
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Register}/{action=Index}/{id?}");
+                pattern: "{controller=Home}/{action=Index}/{id?}");
 
             app.Run();
         }
