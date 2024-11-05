@@ -40,4 +40,10 @@ publish/
 # Package output
 *.nupkg
 
+# Ignore secure directory where Firebase service account key is stored
+secure/
+
+# Ignore secrets.json file if used for local environment variables
+secrets.json
+
 #Testing changes
