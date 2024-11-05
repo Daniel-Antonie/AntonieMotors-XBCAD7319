@@ -1,22 +1,27 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Firebase.Database;
 using Firebase.Database.Query;
+using Firebase.Auth;
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using AntonieMotors_XBCAD7319.Models;
+using Firebase.Auth.Providers;
 
 namespace AntonieMotors_XBCAD7319.Controllers
 {
     public class CustomerController : Controller
     {
         private readonly FirebaseClient _database;
+        private readonly FirebaseAuthProvider _authProvider;
 
         public CustomerController()
         {
             // Initialize FirebaseClient
             _database = new FirebaseClient("https://antonie-motors-default-rtdb.firebaseio.com/");
+            _authProvider = new FirebaseAuthProvider(new Firebase.Auth.FirebaseConfig("YOUR_FIREBASE_API_KEY"));
+
             TestFirebaseConnection();
         }
 
@@ -96,16 +101,23 @@ namespace AntonieMotors_XBCAD7319.Controllers
                 return View(customer);
             }
 
-            // 7. Set additional required values for the database
-            customer.CustomerAddedDate = DateTime.UtcNow.ToString("yyyy-MM-dd");
-
-            string path = $"Users/{customer.BusinessID}/Customers/{customer.CustomerID}";
-
-            // 8. Save to Firebase
+            // 7. Register user in Firebase Authentication
             try
             {
-                Console.WriteLine($"Saving Customer to Firebase at path: {path}");
+                var auth = await _authProvider.CreateUserWithEmailAndPasswordAsync(customer.CustomerEmail, customer.CustomerPassword, displayName: customer.CustomerName);
+                var firebaseToken = auth.FirebaseToken;
 
+                if (string.IsNullOrEmpty(firebaseToken))
+                {
+                    throw new Exception("Authentication failed. Token is null or empty.");
+                }
+
+                // 8. Set additional required values for the database
+                customer.CustomerAddedDate = DateTime.UtcNow.ToString("yyyy-MM-dd");
+
+                string path = $"Users/{customer.BusinessID}/Customers/{customer.CustomerID}";
+
+                // 9. Save customer data to Firebase Realtime Database
                 await _database
                     .Child(path)
                     .PutAsync(customer);
@@ -114,13 +126,12 @@ namespace AntonieMotors_XBCAD7319.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to save customer to Firebase: {ex.Message}");
-                ModelState.AddModelError(string.Empty, "Failed to save customer data. Please try again.");
+                Console.WriteLine($"Failed to create user or save customer data: {ex.Message}");
+                ModelState.AddModelError(string.Empty, "Failed to register the account. Please try again.");
             }
 
             return View(customer);
         }
-
 
 
         public IActionResult Success()

@@ -7,13 +7,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Antonie Motors Customer Registration</title>
+    <title> Registration Success </title>
     <style>
         body {
             margin: 0;
             padding: 0;
             font-family: Arial, sans-serif;
-            background-image: url('/Images/regbg.jpg'); 
+            background-image: url('/Images/regbg.jpg');
             background-size: cover;
             background-position: center;
             position: relative;
@@ -131,57 +131,19 @@
 
     <div class="registration-container">
         <div class="registration-box">
-            <h2>Register</h2>
-            <form action="/Customer/Register" method="post" onsubmit="return validatePassword()">
-                <label for="customerName">First Name</label>
-                <input type="text" id="customerName" name="CustomerName" placeholder="John" required>
+            <h2>Login</h2>
+            <form action="/Login">
 
-                <label for="customerSurname">Last Name</label>
-                <input type="text" id="customerSurname" name="CustomerSurname" placeholder="Doe" required>
+                <h2>Login Successful!</h2>
+                <p>You have successfully logged into Antonie Motors.</p>
+                <a href="/Home/Index">Return Home</a>
 
-                <label for="customerMobileNum">Mobile Number</label>
-                <input type="text" id="customerMobileNum" name="CustomerMobileNum" placeholder="123-456-7890" required>
 
-                <label for="email">Email</label>
-                <input type="email" id="email" name="CustomerEmail" placeholder="username@gmail.com" required>
-
-                <label for="customerAddress">Physical Address</label>
-                <input type="text" id="customerAddress" name="CustomerAddress" placeholder="123 Main St" required>
-
-                <label for="password">Password</label>
-                <input type="password" id="customerPassword" name="CustomerPassword" placeholder="Password" required>
-
-                <label for="confirm-password">Confirm Password</label>
-                <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm Password" required>
-
-                <label for="customerType">Customer Type</label>
-                <select id="customerType" name="CustomerType" required>
-                    <option value="private">Private</option>
-                    <option value="business">Business</option>
-                </select>
-
-                <div>
-                </div>
-
-                <button type="submit">Register Account</button>
-               
             </form>
 
-            <a href="/Login/UserLogin">Have an account? Sign In</a>
         </div>
     </div>
 
-    <script>
-        function validatePassword() {
-            var password = document.getElementById("customerPassword").value;
-            var confirmPassword = document.getElementById("confirmPassword").value;
-            if (password !== confirmPassword) {
-                alert("Passwords do not match.");
-                return false;
-            }
-            return true;
-        }
-    </script>
-
+   
 </body>
 </html>

@@ -4,7 +4,12 @@ namespace AntonieMotors_XBCAD7319.Controllers
 {
     public class LoginController : Controller
     {
-        public IActionResult Index()
+        public IActionResult UserLogin()
+        {
+            return View();
+        }
+
+        public IActionResult CustomerLoginSuccess()
         {
             return View();
         }
