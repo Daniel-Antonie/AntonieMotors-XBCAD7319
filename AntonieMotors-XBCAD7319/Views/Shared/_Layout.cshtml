@@ -10,14 +10,13 @@
 </head>
 <body>
     <div id="page-wrapper">
-
         <header id="header">
-            <h1 id="logo"><a href="index.cshtml">Antonie Motors</a></h1>
+            <h1 id="logo"><a href="~/Home/Index">Antonie Motors</a></h1>
             <nav id="nav">
                 <ul>
-                    <li><a href="index.cshtml">Home</a></li>
+                    <li><a asp-controller="Home" asp-action="Index">Home</a></li>
                     <li>
-                        <a href="#">Login</a>
+                        <a asp-controller="Login" asp-action="Index">Login</a>
                         <ul>
                             <li><a href="left-sidebar.html">Left Sidebar</a></li>
                             <li><a href="right-sidebar.html">Right Sidebar</a></li>
@@ -33,46 +32,25 @@
                             </li>
                         </ul>
                     </li>
-                    <li><a href="~/AMHomePageDesign/elements.cshtml">Register</a></li>
-                    <li><a href="#" class="button primary">Register</a></li>
+                    <li><a asp-controller="Register" asp-action="Index">Register</a></li>
+                    <li><a asp-controller="Register" asp-action="Index" class="button primary">Register</a></li>
                 </ul>
             </nav>
         </header>
 
-   @*  <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">AntonieMotors_XBCAD7319</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    </header> *@
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
-
-    <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2024 - AntonieMotors_XBCAD7319 - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <main role="main" class="pb-3">
+                @RenderBody()
+            </main>
         </div>
-    </footer>
 
+        <footer class="border-top footer text-muted">
+            <div class="container">
+                &copy; 2024 - AntonieMotors_XBCAD7319 - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            </div>
+        </footer>
     </div>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
