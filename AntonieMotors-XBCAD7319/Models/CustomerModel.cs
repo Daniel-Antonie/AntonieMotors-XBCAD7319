@@ -10,6 +10,7 @@
         public string CustomerEmail { get; set; }
         public string CustomerAddress { get; set; }
         public string CustomerType { get; set; }
+        public string CustomerPassword { get; set; }
         public string CustomerAddedDate { get; set; } = DateTime.UtcNow.ToString("yyyy-MM-dd");
     }
 }

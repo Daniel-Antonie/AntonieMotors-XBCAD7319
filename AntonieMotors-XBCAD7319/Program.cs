@@ -1,6 +1,11 @@
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
+using System;
 using System.IO;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace AntonieMotors_XBCAD7319
 {
@@ -8,28 +13,39 @@ namespace AntonieMotors_XBCAD7319
     {
         public static void Main(string[] args)
         {
-
             var builder = WebApplication.CreateBuilder(args);
-
-            // Retrieve the Firebase key path from environment variables
-            var firebaseKeyPath = builder.Configuration["FIREBASE_KEY_PATH"];
-
-            if (string.IsNullOrEmpty(firebaseKeyPath) || !File.Exists(firebaseKeyPath))
-            {
-                throw new FileNotFoundException("Firebase service account key file not found at the specified path: " + firebaseKeyPath);
-            }
-
-            // Initialize Firebase with the service account key
-            FirebaseApp.Create(new AppOptions
-            {
-                Credential = GoogleCredential.FromFile(firebaseKeyPath)
-            });
-
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
             var app = builder.Build();
+
+            // Create logger instance after building the app
+            var logger = app.Services.GetRequiredService<ILogger<Program>>();
+
+            try
+            {
+                // Retrieve the Firebase key path from environment variables
+                var firebaseKeyPath = builder.Configuration["FIREBASE_KEY_PATH"];
+
+                if (string.IsNullOrEmpty(firebaseKeyPath) || !File.Exists(firebaseKeyPath))
+                {
+                    throw new FileNotFoundException("Firebase service account key file not found at the specified path: " + firebaseKeyPath);
+                }
+
+                // Initialize Firebase with the service account key
+                FirebaseApp.Create(new AppOptions
+                {
+                    Credential = GoogleCredential.FromFile(firebaseKeyPath)
+                });
+
+                logger.LogInformation("Firebase initialized successfully.");
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to initialize Firebase.");
+                throw; // Re-throw to allow the application to stop, or handle accordingly.
+            }
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
