@@ -1,51 +1,53 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using FirebaseAdmin.Database;
+using Firebase.Database; 
+using Firebase.Database.Query;
+using System;
 using System.Threading.Tasks;
+using AntonieMotors_XBCAD7319.Models;
 
 namespace AntonieMotors_XBCAD7319.Controllers
 {
     public class CustomerController : Controller
     {
-       
+        private readonly FirebaseClient _database;
 
-        public class CustomerController : Controller
+        public CustomerController()
         {
-            private readonly FirebaseDatabase _database;
+            // Use FirebaseClient for FirebaseDatabase.net
+            _database = new FirebaseClient("https://antonie-motors-default-rtdb.firebaseio.com/");
+        }
 
-            public CustomerController()
+        [HttpGet]
+        public IActionResult Register()
+        {
+            return View(new CustomerModel());
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Register(CustomerModel customer)
+        {
+            if (ModelState.IsValid)
             {
-                _database = FirebaseDatabase.DefaultInstance;
+                // Generate a unique CustomerID using Guid
+                customer.CustomerID = Guid.NewGuid().ToString();
+                customer.CustomerAddedDate = DateTime.UtcNow.ToString("yyyy-MM-dd");
+
+                // Path to store customer data under the business ID
+                string path = $"Users/{customer.BusinessID}/Customers/{customer.CustomerID}";
+
+                // Save customer data to Firebase
+                await _database
+                    .Child(path)
+                    .PutAsync(customer);
+
+                return RedirectToAction("Success"); // Redirect to a success page or any other page
             }
+            return View(customer);
+        }
 
-            [HttpGet]
-            public IActionResult Register()
-            {
-                return View(new CustomerData());
-            }
-
-            [HttpPost]
-            public async Task<IActionResult> Register(CustomerData customer)
-            {
-                if (ModelState.IsValid)
-                {
-                    customer.CustomerID = _database.RootReference.Push().Key;
-                    customer.CustomerAddedDate = DateTime.UtcNow.ToString("yyyy-MM-dd");
-
-                    // Path to store customer data under the business ID
-                    string path = $"Users/{customer.BusinessID}/Customers/{customer.CustomerID}";
-
-                    // Save customer data to Firebase
-                    await _database.GetReference(path).SetRawJsonValueAsync(Newtonsoft.Json.JsonConvert.SerializeObject(customer));
-
-                    return RedirectToAction("Success"); // Redirect to a success page or any other page
-                }
-                return View(customer);
-            }
-
-            public IActionResult Success()
-            {
-                return View();
-            }
+        public IActionResult Success()
+        {
+            return View();
         }
     }
 }
