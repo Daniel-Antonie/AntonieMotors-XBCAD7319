@@ -7,7 +7,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using AntonieMotors_XBCAD7319.Models;
-using Firebase.Auth.Providers;
 
 namespace AntonieMotors_XBCAD7319.Controllers
 {
@@ -20,7 +19,7 @@ namespace AntonieMotors_XBCAD7319.Controllers
         {
             // Initialize FirebaseClient
             _database = new FirebaseClient("https://antonie-motors-default-rtdb.firebaseio.com/");
-            _authProvider = new FirebaseAuthProvider(new Firebase.Auth.FirebaseConfig("YOUR_FIREBASE_API_KEY"));
+            _authProvider = new FirebaseAuthProvider(new Firebase.Auth.FirebaseConfig("AIzaSyDJxhod4pFGkhUP_Hn3wHI2b3hOiI_dpiY"));
 
             TestFirebaseConnection();
         }
