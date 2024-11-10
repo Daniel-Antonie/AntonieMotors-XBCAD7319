@@ -160,5 +160,35 @@ namespace AntonieMotors_XBCAD7319.Controllers
         {
             return View();
         }
+
+
+        public IActionResult Index()
+        {
+            return View();
+        }
+
+        public IActionResult QuoteGeneratorCust()
+        {
+            return View();
+        }
+
+        public IActionResult ViewCarStatus()
+        {
+            return View();
+        }
+
+        public IActionResult ServiceHistory()
+        {
+            return View();
+        }
+        //public IActionResult AnotherOption()
+        //{
+        //    return View();
+        //}
+
+        //public IActionResult Analytics()
+        //{
+        //    return View();
+        //}
     }
 }
