@@ -2,9 +2,153 @@
     Layout = "~/Views/Shared/_CustomerLayout.cshtml";
 }
 
+<link rel="stylesheet" href="~/css/servicepagestyle.css" />
+
 <div class="container-fluid" style="margin-left: 250px;">
 
 
-    <!--put your code here-->
+    <h1>Service History</h1>
+
+
+
+    @*search*@
+
+    <div class="input-wrapper">
+        <button class="icon">
+            <svg xmlns="~/Images/searchIcon.svg" fill="none" viewBox="0 0 24 24" height="25px" width="25px">
+                <path stroke-linejoin="round" stroke-linecap="round" stroke-width="1.5" stroke="#fff" d="M11.5 21C16.7467 21 21 16.7467 21 11.5C21 6.25329 16.7467 2 11.5 2C6.25329 2 2 6.25329 2 11.5C2 16.7467 6.25329 21 11.5 21Z"></path>
+                <path stroke-linejoin="round" stroke-linecap="round" stroke-width="1.5" stroke="#fff" d="M22 22L20 20"></path>
+            </svg>
+        </button>
+        <input placeholder="Search Services by Name" class="input" name="text" type="text">
+    </div>
+
+    <br/>
+
+    @* Vehicle Dropdown *@
+    <div class="dropdown-button-container">
+        <button class="dropdown-button">Select Vehicle&nbsp; ▼</button>
+        <div class="dropdown-content-vehicles">
+            <a id="top" href="#">Vehicle 1</a>
+            <a id="middle" href="#">Vehicle 2</a>
+            <a id="bottom" href="#">Vehicle 3</a>
+        </div>
+    </div>
+
+    <div class="service-cards-container">
+        <section class="service-card">
+            <h2 class="service-name">Service Name</h2>
+            <p class="status-badge-not-started">Status: Not Started</p>
+            <div class="service-details">
+                <div class="details-labels">
+                    <div>
+                        <p>Vehicle:</p>
+                    </div>
+                    <div class="vehicle-info">
+                        <p>Model:</p>
+                        <p>Number Plate:</p>
+                    </div>
+                    <p class="date-info">Date Taken In:</p>
+                    <p class="date-info">Date Vehicle Returned:</p>
+                    <div>
+                        <p style="color: #EE2F2E;">Total Cost:</p>
+                    </div>
+                </div>
+                <div class="details-values">
+                    <p>Honda CRV 2008</p>
+                    <p>HMR 665 GP</p>
+                    <div class="date-values">
+                        <p>15 September 2024</p>
+                        <p>19 September 2024</p>
+                    </div>
+                    <p style="color: #EE2F2E;">R 2580,90</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="service-card">
+            <h2 class="service-name">Service Name</h2>
+            <p class="status-badge-busy">Status: Busy</p>
+            <div class="service-details">
+                <div class="details-labels">
+                    <p>Vehicle:</p>
+                    <div class="vehicle-info">
+                        <p>Model:</p>
+                        <p>Number Plate:</p>
+                    </div>
+                    <p class="date-info">Date Taken In:</p>
+                    <p class="date-info">Date Vehicle Returned:</p>
+                    <div>
+                        <p style="color: #EE2F2E;">Total Cost:</p>
+                    </div>
+                </div>
+                <div class="details-values">
+                    <p>Honda CRV 2008</p>
+                    <p>HMR 665 GP</p>
+                    <div class="date-values">
+                        <p>15 September 2024</p>
+                        <p>19 September 2024</p>
+                    </div>
+                    <p style="color: #EE2F2E;">R 2580,90</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="service-card">
+            <h2 class="service-name">Service Name</h2>
+            <p class="status-badge-completed">Status: Completed</p>
+            <div class="service-details">
+                <div class="details-labels">
+                    <p>Vehicle:</p>
+                    <div class="vehicle-info">
+                        <p>Model:</p>
+                        <p>Number Plate:</p>
+                    </div>
+                    <p class="date-info">Date Taken In:</p>
+                    <p class="date-info">Date Vehicle Returned:</p>
+                    <div>
+                        <p style="color: #EE2F2E;">Total Cost:</p>
+                    </div>
+                </div>
+                <div class="details-values">
+                    <p>Honda CRV 2008</p>
+                    <p>HMR 665 GP</p>
+                    <div class="date-values">
+                        <p>15 September 2024</p>
+                        <p>19 September 2024</p>
+                    </div>
+                    <p style="color: #EE2F2E;">R 2580,90</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="service-card">
+            <h2 class="service-name">Service Name</h2>
+            <p class="status-badge-completed">Status: Completed</p>
+            <div class="service-details">
+                <div class="details-labels">
+                    <p>Vehicle:</p>
+                    <div class="vehicle-info">
+                        <p>Model:</p>
+                        <p>Number Plate:</p>
+                    </div>
+                    <p class="date-info">Date Taken In:</p>
+                    <p class="date-info">Date Vehicle Returned:</p>
+                    <div>
+                        <p style="color: #EE2F2E;">Total Cost:</p>
+                    </div>
+                </div>
+                <div class="details-values">
+                    <p>Honda CRV 2008</p>
+                    <p>HMR 665 GP</p>
+                    <div class="date-values">
+                        <p>15 September 2024</p>
+                        <p>19 September 2024</p>
+                    </div>
+                    <p style="color: #EE2F2E;">R 2580,90</p>
+                </div>
+            </div>
+        </section>
+    </div>
 
 </div>
