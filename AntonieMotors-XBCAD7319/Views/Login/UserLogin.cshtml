@@ -177,20 +177,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
 
-    <!-- Firebase Configuration -->
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyDJxhod4pFGkhUP_Hn3wHI2b3hOiI_dpi",
-            authDomain: "antonie-motors.firebaseapp.com",
-            databaseURL: "https://antonie-motors.firebaseio.com",
-            projectId: "antonie-motors",
-            storageBucket: "antonie-motors.appspot.com",
-            messagingSenderId: "208400258513",
-            appId: "1:208400258513:android:87ee4bec4a1377bccf7cf0"
-        };
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-    </script>
+  
 
 
 </head>
@@ -198,7 +185,17 @@
     <div class="login-container">
         <div class="login-box">
             <h2>Login</h2>
-            <form id="loginForm">
+
+            <!-- Display error message if there is any -->
+            @if (TempData["Error"] != null)
+            {
+                <div style="color: red; font-weight: bold; margin-bottom: 10px;">
+                    @TempData["Error"]
+                </div>
+            }
+
+            <form id="loginForm" asp-action="UserLogin" asp-controller="Login" method="post">
+                @Html.AntiForgeryToken() <!-- Include anti-forgery token -->
                 <label for="email">Email</label>
                 <input type="email" id="email" name="email" placeholder="username@gmail.com" required>
 
@@ -219,41 +216,7 @@
         </div>
     </div>
 
-    <script>
-        // Login Function
-        async function loginUser(email, password) {
-            try {
-                // Attempt to sign in with email and password
-                const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
-
-                // Successful login
-                alert("Login successful! Redirecting...");
-                window.location.href = "/dashboard.html";  // Redirect to your desired page
-
-            } catch (error) {
-                // Handle Errors here.
-                const errorCode = error.code;
-                const errorMessage = error.message;
-
-                // Display error message to user
-                if (errorCode === 'auth/user-not-found') {
-                    alert("No user found with this email.");
-                } else if (errorCode === 'auth/wrong-password') {
-                    alert("Incorrect password.");
-                } else {
-                    alert(errorMessage);
-                }
-            }
-        }
-
-        // Handle form submission
-        document.getElementById("loginForm").addEventListener("submit", function (event) {
-            event.preventDefault();  // Prevent default form submission
-            const email = document.getElementById("email").value;
-            const password = document.getElementById("password").value;
-            loginUser(email, password);  // Call login function
-        });
-    </script>
+ 
 </body>
 
 </html>

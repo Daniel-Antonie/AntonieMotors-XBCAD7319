@@ -57,7 +57,9 @@ namespace AntonieMotors_XBCAD7319.Controllers
         public async Task<IActionResult> Register(CustomerModel customer, string confirmPassword)
         {
           //  customer.BusinessID = "28bc9a9b52a24d5b9579b5b48a75f4fc"; // Hardcoded business ID
-            customer.BusinessID = "33a48a2ae69d46b4a4256c3811f8e57c"; // Perlas one 
+          //  customer.BusinessID = "33a48a2ae69d46b4a4256c3811f8e57c"; // Perlas one 
+          
+            customer.BusinessID = BusinessID.businessId;
 
             // 1. Pre-validation: Clear errors and validate the initial fields except CustomerID
             ModelState.Clear();
