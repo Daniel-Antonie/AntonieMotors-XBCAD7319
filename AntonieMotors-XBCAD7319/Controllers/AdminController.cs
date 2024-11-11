@@ -32,5 +32,10 @@ namespace AntonieMotors_XBCAD7319.Controllers
         {
             return View();
         }
+
+        public IActionResult Services()
+        {
+            return View();
+        }
     }
 }
