@@ -6,19 +6,19 @@
 <h1>Analytics</h1>
 <p>View analytics and metrics for the business performance.</p>
 <div class="row">
-    <div class="col-md-4">
-        <div class="card">
+        <div class="col-md-4">
+            <div class="card" style="background-color: #b2e2c3;">
             <div class="card-body">
-                <h5 class="card-title">Completed Services</h5>
-                <p class="card-text">Number of services completed: 120</p>
+                    <h5 class="card-title" >Completed Services</h5>
+                    <p class="card-text">Number of services completed: <strong>@ViewBag.NumServicesCompleted</strong></p>
             </div>
         </div>
     </div>
     <div class="col-md-4">
-        <div class="card">
+            <div class="card" style="background-color: #f7daaf;">
             <div class="card-body">
-                <h5 class="card-title">Pending Services</h5>
-                <p class="card-text">Number of pending services: 30</p>
+                    <h5 class="card-title" >Pending Services</h5>
+                    <p class="card-text">Number of pending services: <strong>@ViewBag.NumServicesPending</strong> </p>
             </div>
         </div>
     </div>
