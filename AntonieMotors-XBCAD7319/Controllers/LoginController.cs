@@ -28,6 +28,7 @@ namespace AntonieMotors_XBCAD7319.Controllers
                 // Authenticate user with Firebase
                 var auth = await _authProvider.SignInWithEmailAndPasswordAsync(email, password);
                 var userId = auth.User.LocalId;
+                BusinessID.userId = userId;
 
                 // Hardcoded business ID
                // string businessId = "33a48a2ae69d46b4a4256c3811f8e57c";
