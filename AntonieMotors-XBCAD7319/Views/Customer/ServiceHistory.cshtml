@@ -13,7 +13,7 @@
 
     @*search*@
 
-    <div class="input-wrapper">
+    @* <div class="input-wrapper">
         <button class="icon">
             <svg xmlns="~/Images/searchIcon.svg" fill="none" viewBox="0 0 24 24" height="25px" width="25px">
                 <path stroke-linejoin="round" stroke-linecap="round" stroke-width="1.5" stroke="#fff" d="M11.5 21C16.7467 21 21 16.7467 21 11.5C21 6.25329 16.7467 2 11.5 2C6.25329 2 2 6.25329 2 11.5C2 16.7467 6.25329 21 11.5 21Z"></path>
@@ -21,20 +21,19 @@
             </svg>
         </button>
         <input placeholder="Search Services by Name" class="input" name="text" type="text">
-    </div>
+    </div> *@
 
     <br />
 
     @* Vehicle Dropdown *@
-    <div class="dropdown-button-container">
+    @* <div class="dropdown-button-container">
         <button class="dropdown-button">Select Vehicle&nbsp; ▼</button>
         <div class="dropdown-content-vehicles">
             <a id="top" href="#">Vehicle 1</a>
             <a id="middle" href="#">Vehicle 2</a>
             <a id="bottom" href="#">Vehicle 3</a>
         </div>
-    </div>
-
+    </div> *@
     <div class="service-cards-container">
 
         @if (ViewBag.Services != null)
@@ -44,7 +43,9 @@
             {
                 <section class="service-card">
                     <h2 class="service-name">@service.Name</h2>
-                    <p class="@(service.Status == "Not Started" ? "status-badge-not-started" : "status-badge-completed")"> @* to show status *@
+                    <p class="@(service.Status == "Not Started" ? "status-badge-not-started" :
+            service.Status == "Completed" ? "status-badge-completed" :
+            service.Status == "Busy" ? "status-badge-busy" : "")">
                         Status: @service.Status
                     </p>
                     <div class="service-details">
@@ -78,9 +79,10 @@
         else
         {
             <p>No services available.</p>
+            <br />
+            <p style="color: #EE2F2E;"> @ViewBag.ErrorMessage</p>
         }
 
-        }
 
         @* <section class="service-card">
         <h2 class="service-name">Service Name</h2>

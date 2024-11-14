@@ -212,32 +212,50 @@ namespace AntonieMotors_XBCAD7319.Controllers
 
                 foreach (var service in services)
                 {
-                    if (service.Object.custID == BusinessID.userId)
+                    if ((string)service.Object.custID == BusinessID.userId) // Ensure custID is a string
                     {
-                        string vehicleModel = await fetchVehicleModel(service.Object.vehicleID);
-                        string vehicleNumberPlate = await fetchVehicleNumPlate(service.Object.vehicleID);
+                        // Fetching vehicle data
+                        string vehicleModel = await fetchVehicleModel((string)service.Object.vehicleID);
+                        string vehicleNumberPlate = await fetchVehicleNumPlate((string)service.Object.vehicleID);
 
-                        string dateTakenIn = service.Object.dateTakenIn != null
-                            ? DateTimeOffset.FromUnixTimeMilliseconds((long)service.Object.dateTakenIn).ToString("dd MMMM yyyy")
-                            : "N/A";
+                        // Initialize date variables with "N/A"
+                        string dateTakenIn = "N/A";
+                        string dateReturned = "N/A";
 
-                        string dateReturned = service.Object.dateReturned != null
-                            ? DateTimeOffset.FromUnixTimeMilliseconds((long)service.Object.dateReturned).ToString("dd MMMM yyyy")
-                            : "N/A";
+                        // Handle dateTakenIn if it's not null and has a time field (Unix timestamp)
+                        if (service.Object.dateReceived != null && service.Object.dateReceived.time != null)
+                        {
+                            long dateTakenInLong = (long)service.Object.dateReceived.time; // Get Unix timestamp
+                            DateTime dateTakenInDateTime = DateTimeOffset.FromUnixTimeMilliseconds(dateTakenInLong).DateTime; // Convert to DateTime
+                            dateTakenIn = dateTakenInDateTime.ToString("dd MMMM yyyy");
+                        }
 
+                        // Handle dateReturned if it's not null and has a time field (Unix timestamp)
+                        if (service.Object.dateReturned != null && service.Object.dateReturned.time != null)
+                        {
+                            long dateReturnedLong = (long)service.Object.dateReturned.time; // Get Unix timestamp
+                            DateTime dateReturnedDateTime = DateTimeOffset.FromUnixTimeMilliseconds(dateReturnedLong).DateTime; // Convert to DateTime
+                            dateReturned = dateReturnedDateTime.ToString("dd MMMM yyyy");
+                        }
+
+                        // Handling totalCost
+                        string totalCost = $"R {service.Object.totalCost}";
+
+                        // Add the service to the list
                         serviceList.Add(new
                         {
-                            Name = service.Object.name,
-                            Status = service.Object.status,
+                            Name = (string)service.Object.name, // Cast name to string
+                            Status = (string)service.Object.status, // Cast status to string
                             Model = vehicleModel,
                             NumberPlate = vehicleNumberPlate,
                             DateTakenIn = dateTakenIn,
                             DateReturned = dateReturned,
-                            TotalCost = service.Object.totalCost
-                        }); 
+                            TotalCost = totalCost
+                        });
                     }
                 }
 
+                // Set services in ViewBag
                 ViewBag.Services = serviceList;
                 Console.WriteLine($"Services fetched: {serviceList.Count}");
             }
@@ -246,6 +264,9 @@ namespace AntonieMotors_XBCAD7319.Controllers
                 ViewBag.ErrorMessage = $"Error: {e.Message}";
             }
         }
+
+
+
 
         private async Task<string> fetchVehicleNumPlate(dynamic vehicleID)
         {
@@ -296,5 +317,7 @@ namespace AntonieMotors_XBCAD7319.Controllers
 
             return fullName;
         }
+
+       
     }
 }
