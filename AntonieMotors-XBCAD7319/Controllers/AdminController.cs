@@ -43,6 +43,11 @@ namespace AntonieMotors_XBCAD7319.Controllers
             return View();
         }
 
+        public IActionResult EmployeeManagement()
+        {
+            return View();
+        }
+
         public async Task<IActionResult> AnalyticsAsync()
         {
             //fetch analytics data to display
