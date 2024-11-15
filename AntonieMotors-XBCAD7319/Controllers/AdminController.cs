@@ -1,4 +1,5 @@
-﻿using Firebase.Auth;
+﻿using AntonieMotors_XBCAD7319.Models;
+using Firebase.Auth;
 using Firebase.Database;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,8 +16,8 @@ namespace AntonieMotors_XBCAD7319.Controllers
 
         public AdminController()
         {
-            _authProvider = new FirebaseAuthProvider(new Firebase.Auth.FirebaseConfig("AIzaSyDJxhod4pFGkhUP_Hn3wHI2b3hOiI_dpiY"));
-            _firebaseClient = new FirebaseClient("https://antonie-motors-default-rtdb.firebaseio.com/");
+            _authProvider = new FirebaseAuthProvider(new Firebase.Auth.FirebaseConfig("Firebase:ApiKey"));
+            _firebaseClient = new FirebaseClient("Firebase:DatabaseUrl");
         }
 
         public IActionResult Index()
@@ -43,10 +44,80 @@ namespace AntonieMotors_XBCAD7319.Controllers
             return View();
         }
 
-        public IActionResult EmployeeManagement()
+        public async Task<IActionResult> EmployeeManagement()
         {
-            return View();
+            string businessId = BusinessID.businessId; // Replace with the logged-in user's business ID
+            string managerId = BusinessID.userId; // Replace with logged-in user's manager ID
+
+            var employees = await GetEmployeesAsync(businessId, managerId);
+
+            return View(employees);
         }
+
+        private async Task<List<EmployeeModel>> GetEmployeesAsync(string businessId, string managerId)
+        {
+            try
+            {
+                // Fetch employees under the businessId
+                var employees = await _firebaseClient
+                    .Child($"Users/{businessId}/Employees")
+                    .OnceAsync<EmployeeModel>();
+
+                // Filter employees by managerId
+                return employees
+                    .Where(e => e.Object.ManagerID == managerId)
+                    .Select(e => new EmployeeModel
+                    {
+                       // EmployeeID = e.Key,
+                        FirstName = e.Object.FirstName,
+                        LastName = e.Object.LastName,
+                        Email = e.Object.Email,
+                        Phone = e.Object.Phone,
+                        ManagerID = e.Object.ManagerID
+                    })
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                // Handle exceptions
+                Console.WriteLine($"Error fetching employees: {ex.Message}");
+                return new List<EmployeeModel>();
+            }
+        }
+
+
+        public async Task<IActionResult> EditEmployee(string id)
+        {
+            string businessId = BusinessID.businessId;
+
+            // Fetch the employee details from Firebase
+            var employee = await GetEmployeeByIdAsync(businessId, id);
+            if (employee == null)
+            {
+                return NotFound();
+            }
+
+            return View(employee);
+        }
+
+        private async Task<EmployeeModel> GetEmployeeByIdAsync(string businessId, string employeeId)
+        {
+            try
+            {
+                var employee = await _firebaseClient
+                    .Child($"Users/{businessId}/Employees/{employeeId}")
+                    .OnceSingleAsync<EmployeeModel>();
+
+                return employee;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching employee: {ex.Message}");
+                return null;
+            }
+        }
+
+
 
         public async Task<IActionResult> AnalyticsAsync()
         {
