@@ -101,7 +101,7 @@ namespace AntonieMotors_XBCAD7319.Controllers
             }
 
             // Check if email already exists in Firebase Database
-            var existingCustomers = await _database
+            var existingCustomers = await _firebaseClient
                 .Child("Users")
                 .Child(customer.BusinessID)
                 .Child("Customers")
@@ -146,8 +146,7 @@ namespace AntonieMotors_XBCAD7319.Controllers
                 string path = $"Users/{customer.BusinessID}/Customers/{customer.CustomerID}";
 
                 // 4. Save customer data to Firebase Database
-                await _database
-                    .Child(path)
+                _firebaseClient.Child(path)
                     .PutAsync(customer);
 
                 return RedirectToAction("Success");
@@ -209,7 +208,7 @@ namespace AntonieMotors_XBCAD7319.Controllers
         {
             try
             {
-                var services = await _database.Child($"Users/{BusinessID.businessId}/Services").OnceAsync<dynamic>();
+                var services = await _firebaseClient.Child($"Users/{BusinessID.businessId}/Services").OnceAsync<dynamic>();
 
                 if (services == null || !services.Any())
                 {
@@ -278,7 +277,7 @@ namespace AntonieMotors_XBCAD7319.Controllers
         {
             try
             {
-                return await _database.Child($"Users/{BusinessID.businessId}/Vehicles/{vehicleID}/vehicleNumPlate").OnceSingleAsync<String>();
+                return await _firebaseClient.Child($"Users/{BusinessID.businessId}/Vehicles/{vehicleID}/vehicleNumPlate").OnceSingleAsync<String>();
             }
             catch (Exception e)
             {
@@ -292,8 +291,8 @@ namespace AntonieMotors_XBCAD7319.Controllers
 
             try
             {
-                string vehMake = await _database.Child($"Users/{BusinessID.businessId}/Vehicles/{vehicleID}/vehicleMake").OnceSingleAsync<String>();
-                string vehModel = await _database.Child($"Users/{BusinessID.businessId}/Vehicles/{vehicleID}/vehicleModel").OnceSingleAsync<String>();
+                string vehMake = await _firebaseClient.Child($"Users/{BusinessID.businessId}/Vehicles/{vehicleID}/vehicleMake").OnceSingleAsync<String>();
+                string vehModel = await _firebaseClient.Child($"Users/{BusinessID.businessId}/Vehicles/{vehicleID}/vehicleModel").OnceSingleAsync<String>();
 
                 vehMakeModel = vehMake + " " + vehModel;
             }
@@ -311,8 +310,8 @@ namespace AntonieMotors_XBCAD7319.Controllers
 
             try
             {
-                string firstName = await _database.Child($"Users/{BusinessID.businessId}/Customers/{custID}/CustomerName").OnceSingleAsync<String>();
-                string surname = await _database.Child($"Users/{BusinessID.businessId}/Customers/{custID}/CustomerSurname").OnceSingleAsync<String>();
+                string firstName = await _firebaseClient.Child($"Users/{BusinessID.businessId}/Customers/{custID}/CustomerName").OnceSingleAsync<String>();
+                string surname = await _firebaseClient.Child($"Users/{BusinessID.businessId}/Customers/{custID}/CustomerSurname").OnceSingleAsync<String>();
 
                 fullName = firstName + " " + surname;
             }
