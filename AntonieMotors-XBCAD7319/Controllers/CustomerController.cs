@@ -59,48 +59,37 @@ namespace AntonieMotors_XBCAD7319.Controllers
             return View(new CustomerModel());
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Register(CustomerModel customer, string confirmPassword)
-        {
-            //  customer.BusinessID = "28bc9a9b52a24d5b9579b5b48a75f4fc"; // Hardcoded business ID
-            //  customer.BusinessID = "33a48a2ae69d46b4a4256c3811f8e57c"; // Perlas one 
+      
 
+        [HttpPost]
+        public async Task<IActionResult> Register(CustomerModel customer, string customerPassword, string confirmPassword)
+        {
             customer.BusinessID = BusinessID.businessId;
 
-            // 1. Pre-validation: Clear errors and validate the initial fields except CustomerID
+            // Validate password confirmation
+            if (string.IsNullOrEmpty(customerPassword) || customerPassword != confirmPassword)
+            {
+                ModelState.AddModelError("CustomerPassword", "Passwords do not match.");
+                return View(customer);
+            }
+
+            // Clear errors and validate the model (excluding CustomerPassword)
             ModelState.Clear();
             TryValidateModel(customer);
 
-            // Password confirmation check
-            if (string.IsNullOrEmpty(confirmPassword) || customer.CustomerPassword != confirmPassword)
-            {
-                ModelState.AddModelError("CustomerPassword", "Passwords do not match.");
-            }
-
-            // 4. Validate ModelState after setting required fields
-            if (!ModelState.IsValid)
-            {
-                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
-                {
-                    Console.WriteLine("Model validation error: " + error.ErrorMessage);
-                }
-                return View(customer);
-            }
-
-            // Validate other fields before setting CustomerID
             if (!ModelState.IsValid)
             {
                 return View(customer);
             }
 
-            // Phone number validation
+            // Validate phone number format
             if (!Regex.IsMatch(customer.CustomerMobileNum, @"^\d{10}$"))
             {
                 ModelState.AddModelError("CustomerMobileNum", "Mobile number must be exactly 10 digits.");
                 return View(customer);
             }
 
-            // Check if email already exists in Firebase Database
+            // Check for existing email in Firebase Database
             var existingCustomers = await _firebaseClient
                 .Child("Users")
                 .Child(customer.BusinessID)
@@ -115,39 +104,23 @@ namespace AntonieMotors_XBCAD7319.Controllers
 
             try
             {
-                // 2. Register user in Firebase Authentication to get the UID
+                // Register user in Firebase Authentication and retrieve UID
                 var auth = await _authProvider.CreateUserWithEmailAndPasswordAsync(
-                    customer.CustomerEmail, customer.CustomerPassword, displayName: customer.CustomerName);
+                    customer.CustomerEmail, customerPassword, displayName: customer.CustomerName);
 
-                // Confirm authentication and assign UID to CustomerID
                 var firebaseToken = auth.FirebaseToken;
+
                 if (string.IsNullOrEmpty(firebaseToken))
                 {
                     throw new Exception("Authentication failed. Token is null or empty.");
                 }
 
-                // Assign CustomerID from the UID
+                // Assign UID to CustomerID
                 customer.CustomerID = auth.User.LocalId;
 
-                // 3. Re-validate ModelState with CustomerID set
-                ModelState.Clear();
-                TryValidateModel(customer);
-
-                if (!ModelState.IsValid)
-                {
-                    // Return to view if validation fails after setting CustomerID
-                    return View(customer);
-                }
-
-                // Set the date of registration
-                customer.CustomerAddedDate = DateTime.UtcNow.ToString("yyyy-MM-dd");
-
-                // Define path to save the customer
+                // Save customer to Firebase Database (excluding password)
                 string path = $"Users/{customer.BusinessID}/Customers/{customer.CustomerID}";
-
-                // 4. Save customer data to Firebase Database
-                _firebaseClient.Child(path)
-                    .PutAsync(customer);
+                await _firebaseClient.Child(path).PutAsync(customer);
 
                 return RedirectToAction("Success");
             }
@@ -159,6 +132,11 @@ namespace AntonieMotors_XBCAD7319.Controllers
 
             return View(customer);
         }
+
+
+
+
+
 
 
 
