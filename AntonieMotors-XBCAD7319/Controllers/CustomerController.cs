@@ -13,8 +13,8 @@ namespace AntonieMotors_XBCAD7319.Controllers
 {
     public class CustomerController : Controller
     {
-        private readonly FirebaseClient _database = new FirebaseClient("https://antonie-motors-default-rtdb.firebaseio.com/");
-        private readonly FirebaseAuthProvider _authProvider = new FirebaseAuthProvider(new Firebase.Auth.FirebaseConfig("AIzaSyDJxhod4pFGkhUP_Hn3wHI2b3hOiI_dpiY"));
+        private readonly FirebaseClient _database = new FirebaseClient("Firebase:DatabaseUrl");
+        private readonly FirebaseAuthProvider _authProvider = new FirebaseAuthProvider(new Firebase.Auth.FirebaseConfig("Firebase:ApiKey"));
 
         public CustomerController()
         {
