@@ -1,0 +1,13 @@
+﻿@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid" style="margin-left: 250px;">
+    <h2>Delete Account</h2>
+    <p>Are you sure you want to delete your account? This action is irreversible.</p>
+    <form asp-action="ConfirmDeleteAccount" method="post">
+        <button type="submit" class="btn btn-danger">Delete Account</button>
+    </form>
+
+
+</div>

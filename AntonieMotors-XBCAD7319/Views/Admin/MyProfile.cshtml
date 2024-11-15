@@ -1,0 +1,21 @@
+﻿@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid" style="margin-left: 250px;">
+    <h2>My Profile</h2>
+    <form asp-action="EditProfile" method="post">
+        <div>
+            <label>Name:</label>
+            <input asp-for="Name" class="form-control" />
+            <button type="submit">Edit</button>
+        </div>
+        <div>
+            <label>Email:</label>
+            <input asp-for="Email" class="form-control" readonly />
+        </div>
+        <!-- Repeat for other profile fields as needed -->
+    </form>
+
+
+</div>
