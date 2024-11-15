@@ -265,9 +265,6 @@ namespace AntonieMotors_XBCAD7319.Controllers
             }
         }
 
-
-
-
         private async Task<string> fetchVehicleNumPlate(dynamic vehicleID)
         {
             try

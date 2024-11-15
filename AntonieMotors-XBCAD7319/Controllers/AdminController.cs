@@ -77,11 +77,17 @@ namespace AntonieMotors_XBCAD7319.Controllers
                 ViewBag.NumServicesCompleted = completedServicesCount;
 
 
-                //counting pending services
-                int nonCompletedServicesCount = services.Count(service =>
-                    service.Object.status != null && service.Object.status.ToString() != "Completed");
+                //counting busy services
+                int busyServicesCount = services.Count(service =>
+                    service.Object.status != null && service.Object.status.ToString() == "Busy");
 
-                ViewBag.NumServicesPending = nonCompletedServicesCount;
+                ViewBag.NumServicesBusy = busyServicesCount;
+
+                //counting not started services
+                int notStartedServicesCount = services.Count(service =>
+                    service.Object.status != null && service.Object.status.ToString() == "Not Started");
+
+                ViewBag.NumServicesNotStarted = notStartedServicesCount;
             }
             catch (Exception e)
             {
