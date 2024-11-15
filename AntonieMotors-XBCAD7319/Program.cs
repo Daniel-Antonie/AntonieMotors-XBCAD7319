@@ -20,6 +20,14 @@ namespace AntonieMotors_XBCAD7319
 
             var app = builder.Build();
 
+           // var builder = WebApplication.CreateBuilder(args);
+
+            // Load secrets.json
+            builder.Configuration.AddJsonFile("secrets.json", optional: true, reloadOnChange: true);
+
+           // var app = builder.Build();
+
+
             // Create logger instance after building the app
             var logger = app.Services.GetRequiredService<ILogger<Program>>();
 

@@ -11,10 +11,14 @@ namespace AntonieMotors_XBCAD7319.Controllers
         private readonly FirebaseAuthProvider _authProvider;
         private readonly FirebaseClient _firebaseClient;
 
-        public LoginController()
+        public LoginController(IConfiguration configuration)
         {
-            _authProvider = new FirebaseAuthProvider(new Firebase.Auth.FirebaseConfig("Firebase:ApiKey"));
-            _firebaseClient = new FirebaseClient("Firebase: DatabaseUrl");
+            string apiKey = configuration["Firebase:ApiKey"];
+            string databaseUrl = configuration["Firebase:DatabaseUrl"];
+
+            // Initialize Firebase objects
+            _authProvider = new FirebaseAuthProvider(new FirebaseConfig(apiKey));
+            _firebaseClient = new FirebaseClient(databaseUrl);
         }
 
         [HttpPost]

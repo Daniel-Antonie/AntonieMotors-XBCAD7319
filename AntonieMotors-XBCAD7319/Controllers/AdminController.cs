@@ -3,6 +3,7 @@ using Firebase.Auth;
 using Firebase.Database;
 using Firebase.Database.Query;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 
 namespace AntonieMotors_XBCAD7319.Controllers
 {
@@ -15,10 +16,14 @@ namespace AntonieMotors_XBCAD7319.Controllers
 
 
 
-        public AdminController()
+        public AdminController(IConfiguration configuration)
         {
-            _authProvider = new FirebaseAuthProvider(new Firebase.Auth.FirebaseConfig("Firebase:ApiKey"));
-            _firebaseClient = new FirebaseClient("Firebase:DatabaseUrl");
+            string apiKey = configuration["Firebase:ApiKey"];
+            string databaseUrl = configuration["Firebase:DatabaseUrl"];
+
+            // Initialize Firebase objects
+            _authProvider = new FirebaseAuthProvider(new FirebaseConfig(apiKey));
+            _firebaseClient = new FirebaseClient(databaseUrl);
         }
 
         public IActionResult Index()

@@ -13,19 +13,28 @@ namespace AntonieMotors_XBCAD7319.Controllers
 {
     public class CustomerController : Controller
     {
-        private readonly FirebaseClient _database = new FirebaseClient("Firebase:DatabaseUrl");
-        private readonly FirebaseAuthProvider _authProvider = new FirebaseAuthProvider(new Firebase.Auth.FirebaseConfig("Firebase:ApiKey"));
+        private readonly FirebaseAuthProvider _authProvider;
+        private readonly FirebaseClient _firebaseClient;
 
-        public CustomerController()
+
+
+        public CustomerController(IConfiguration configuration)
         {
-            TestFirebaseConnection();
+            string apiKey = configuration["Firebase:ApiKey"];
+            string databaseUrl = configuration["Firebase:DatabaseUrl"];
+
+            // Initialize Firebase objects
+            _authProvider = new FirebaseAuthProvider(new FirebaseConfig(apiKey));
+            _firebaseClient = new FirebaseClient(databaseUrl);
+        
+        TestFirebaseConnection();
         }
 
         public async Task<IActionResult> TestFirebaseConnection()
         {
             try
             {
-                var data = await _database
+                var data = await _firebaseClient
                     .Child("Users")
                     .OnceAsync<object>();
 
