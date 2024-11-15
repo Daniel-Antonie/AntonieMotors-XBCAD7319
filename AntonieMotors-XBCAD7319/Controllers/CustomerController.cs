@@ -7,20 +7,17 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using AntonieMotors_XBCAD7319.Models;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 
 namespace AntonieMotors_XBCAD7319.Controllers
 {
     public class CustomerController : Controller
     {
-        private readonly FirebaseClient _database;
-        private readonly FirebaseAuthProvider _authProvider;
+        private readonly FirebaseClient _database = new FirebaseClient("https://antonie-motors-default-rtdb.firebaseio.com/");
+        private readonly FirebaseAuthProvider _authProvider = new FirebaseAuthProvider(new Firebase.Auth.FirebaseConfig("AIzaSyDJxhod4pFGkhUP_Hn3wHI2b3hOiI_dpiY"));
 
         public CustomerController()
         {
-            // Initialize FirebaseClient
-            _database = new FirebaseClient("https://antonie-motors-default-rtdb.firebaseio.com/");
-            _authProvider = new FirebaseAuthProvider(new Firebase.Auth.FirebaseConfig("AIzaSyDJxhod4pFGkhUP_Hn3wHI2b3hOiI_dpiY"));
-
             TestFirebaseConnection();
         }
 
@@ -56,9 +53,9 @@ namespace AntonieMotors_XBCAD7319.Controllers
         [HttpPost]
         public async Task<IActionResult> Register(CustomerModel customer, string confirmPassword)
         {
-          //  customer.BusinessID = "28bc9a9b52a24d5b9579b5b48a75f4fc"; // Hardcoded business ID
-          //  customer.BusinessID = "33a48a2ae69d46b4a4256c3811f8e57c"; // Perlas one 
-          
+            //  customer.BusinessID = "28bc9a9b52a24d5b9579b5b48a75f4fc"; // Hardcoded business ID
+            //  customer.BusinessID = "33a48a2ae69d46b4a4256c3811f8e57c"; // Perlas one 
+
             customer.BusinessID = BusinessID.businessId;
 
             // 1. Pre-validation: Clear errors and validate the initial fields except CustomerID
@@ -179,10 +176,15 @@ namespace AntonieMotors_XBCAD7319.Controllers
             return View();
         }
 
-        public IActionResult ServiceHistory()
+        public async Task<IActionResult> ServiceHistory()
         {
+            await getAllServices();
+
             return View();
         }
+
+
+
         //public IActionResult AnotherOption()
         //{
         //    return View();
@@ -192,5 +194,127 @@ namespace AntonieMotors_XBCAD7319.Controllers
         //{
         //    return View();
         //}
+
+        //get list of Services
+        private async Task getAllServices()
+        {
+            try
+            {
+                var services = await _database.Child($"Users/{BusinessID.businessId}/Services").OnceAsync<dynamic>();
+
+                if (services == null || !services.Any())
+                {
+                    ViewBag.Services = new List<dynamic>();
+                    return;
+                }
+
+                var serviceList = new List<dynamic>();
+
+                foreach (var service in services)
+                {
+                    if ((string)service.Object.custID == BusinessID.userId) // Ensure custID is a string
+                    {
+                        // Fetching vehicle data
+                        string vehicleModel = await fetchVehicleModel((string)service.Object.vehicleID);
+                        string vehicleNumberPlate = await fetchVehicleNumPlate((string)service.Object.vehicleID);
+
+                        // Initialize date variables with "N/A"
+                        string dateTakenIn = "N/A";
+                        string dateReturned = "N/A";
+
+                        // Handle dateTakenIn if it's not null and has a time field (Unix timestamp)
+                        if (service.Object.dateReceived != null && service.Object.dateReceived.time != null)
+                        {
+                            long dateTakenInLong = (long)service.Object.dateReceived.time; // Get Unix timestamp
+                            DateTime dateTakenInDateTime = DateTimeOffset.FromUnixTimeMilliseconds(dateTakenInLong).DateTime; // Convert to DateTime
+                            dateTakenIn = dateTakenInDateTime.ToString("dd MMMM yyyy");
+                        }
+
+                        // Handle dateReturned if it's not null and has a time field (Unix timestamp)
+                        if (service.Object.dateReturned != null && service.Object.dateReturned.time != null)
+                        {
+                            long dateReturnedLong = (long)service.Object.dateReturned.time; // Get Unix timestamp
+                            DateTime dateReturnedDateTime = DateTimeOffset.FromUnixTimeMilliseconds(dateReturnedLong).DateTime; // Convert to DateTime
+                            dateReturned = dateReturnedDateTime.ToString("dd MMMM yyyy");
+                        }
+
+                        // Handling totalCost
+                        string totalCost = $"R {service.Object.totalCost}";
+
+                        // Add the service to the list
+                        serviceList.Add(new
+                        {
+                            Name = (string)service.Object.name, // Cast name to string
+                            Status = (string)service.Object.status, // Cast status to string
+                            Model = vehicleModel,
+                            NumberPlate = vehicleNumberPlate,
+                            DateTakenIn = dateTakenIn,
+                            DateReturned = dateReturned,
+                            TotalCost = totalCost
+                        });
+                    }
+                }
+
+                // Set services in ViewBag
+                ViewBag.Services = serviceList;
+                Console.WriteLine($"Services fetched: {serviceList.Count}");
+            }
+            catch (Exception e)
+            {
+                ViewBag.ErrorMessage = $"Error: {e.Message}";
+            }
+        }
+
+        private async Task<string> fetchVehicleNumPlate(dynamic vehicleID)
+        {
+            try
+            {
+                return await _database.Child($"Users/{BusinessID.businessId}/Vehicles/{vehicleID}/vehicleNumPlate").OnceSingleAsync<String>();
+            }
+            catch (Exception e)
+            {
+                return "Could not load vehicle data";
+            }
+        }
+
+        private async Task<string> fetchVehicleModel(dynamic vehicleID)
+        {
+            string vehMakeModel = "Could not load vehicle data";
+
+            try
+            {
+                string vehMake = await _database.Child($"Users/{BusinessID.businessId}/Vehicles/{vehicleID}/vehicleMake").OnceSingleAsync<String>();
+                string vehModel = await _database.Child($"Users/{BusinessID.businessId}/Vehicles/{vehicleID}/vehicleModel").OnceSingleAsync<String>();
+
+                vehMakeModel = vehMake + " " + vehModel;
+            }
+            catch (Exception e)
+            {
+                ViewBag.ErrorMessage = $"Error: {e.Message}";
+            }
+
+            return vehMakeModel;
+        }
+
+        private async Task<string> fetchCustName(dynamic custID)
+        {
+            string fullName = "Could not load customer data";
+
+            try
+            {
+                string firstName = await _database.Child($"Users/{BusinessID.businessId}/Customers/{custID}/CustomerName").OnceSingleAsync<String>();
+                string surname = await _database.Child($"Users/{BusinessID.businessId}/Customers/{custID}/CustomerSurname").OnceSingleAsync<String>();
+
+                fullName = firstName + " " + surname;
+            }
+            catch (Exception e)
+            {
+                ViewBag.ErrorMessage = $"Error: {e.Message}";
+            }
+
+            return fullName;
+        }
+
+       
     }
 }

@@ -5,19 +5,30 @@
     gap: 20px; /* Adds space between cards */
     justify-content: space-evenly; /* Evenly spaces out the cards */
     margin-top: 30px;
+    padding-left: 20px; /* Adjust this if the navbar is fixed and takes space on the left */
     margin-left: 0;
+    width: calc(100% - 250px); /* Adjust the width for navbar on left (e.g., 240px for a sidebar) */
+    box-sizing: border-box;
 }
 
 .service-card {
-    flex: 1 1 calc(33.33% - 20px); /* Each card takes up one-third of the width */
-    max-width: calc(33.33% - 10px); /* Ensure width doesn't exceed one-third */
-    min-width: 500px;
+    flex: 1 1 calc(50% - 20px); /* Each card takes up one-third of the width */
+    max-width: calc(50% - 20px); /* Ensure width doesn't exceed one-third */
+    box-sizing: border-box;
     background-color: #fff;
     border: 3px solid #038a39;
     border-radius: 20px;
     padding: 20px;
     text-align: center;
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.25);
+}
+
+/* Media query for smaller screens (tablet or mobile) */
+@media (max-width: 768px) {
+    .service-card {
+        flex: 1 1 calc(100% - 50px); /* On smaller screens, each card takes up 100% of the width */
+        max-width: calc(100% - 50px);
+    }
 }
 
 .service-name {
