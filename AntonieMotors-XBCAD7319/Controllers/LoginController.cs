@@ -13,8 +13,8 @@ namespace AntonieMotors_XBCAD7319.Controllers
 
         public LoginController()
         {
-            _authProvider = new FirebaseAuthProvider(new Firebase.Auth.FirebaseConfig("AIzaSyDJxhod4pFGkhUP_Hn3wHI2b3hOiI_dpiY"));
-            _firebaseClient = new FirebaseClient("https://antonie-motors-default-rtdb.firebaseio.com/");
+            _authProvider = new FirebaseAuthProvider(new Firebase.Auth.FirebaseConfig("Firebase:ApiKey"));
+            _firebaseClient = new FirebaseClient("Firebase: DatabaseUrl");
         }
 
         [HttpPost]

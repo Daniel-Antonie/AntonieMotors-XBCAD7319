@@ -1,6 +1,7 @@
 ﻿using AntonieMotors_XBCAD7319.Models;
 using Firebase.Auth;
 using Firebase.Database;
+using Firebase.Database.Query;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AntonieMotors_XBCAD7319.Controllers
@@ -49,10 +50,13 @@ namespace AntonieMotors_XBCAD7319.Controllers
             string businessId = BusinessID.businessId; // Replace with the logged-in user's business ID
             string managerId = BusinessID.userId; // Replace with logged-in user's manager ID
 
+            Console.WriteLine($"BusinessID: {businessId}, ManagerID: {managerId}");
+
             var employees = await GetEmployeesAsync(businessId, managerId);
 
             return View(employees);
         }
+
 
         private async Task<List<EmployeeModel>> GetEmployeesAsync(string businessId, string managerId)
         {
@@ -63,12 +67,14 @@ namespace AntonieMotors_XBCAD7319.Controllers
                     .Child($"Users/{businessId}/Employees")
                     .OnceAsync<EmployeeModel>();
 
+                Console.WriteLine($"Fetched {employees.Count} employees from Firebase.");
+
                 // Filter employees by managerId
-                return employees
+                var filteredEmployees = employees
                     .Where(e => e.Object.ManagerID == managerId)
                     .Select(e => new EmployeeModel
                     {
-                       // EmployeeID = e.Key,
+                        EmployeeID = e.Key,
                         FirstName = e.Object.FirstName,
                         LastName = e.Object.LastName,
                         Email = e.Object.Email,
@@ -76,14 +82,18 @@ namespace AntonieMotors_XBCAD7319.Controllers
                         ManagerID = e.Object.ManagerID
                     })
                     .ToList();
+
+                Console.WriteLine($"Filtered {filteredEmployees.Count} employees for ManagerID: {managerId}");
+                return filteredEmployees;
             }
             catch (Exception ex)
             {
-                // Handle exceptions
+                // Log the error
                 Console.WriteLine($"Error fetching employees: {ex.Message}");
                 return new List<EmployeeModel>();
             }
         }
+
 
 
         public async Task<IActionResult> EditEmployee(string id)
@@ -99,6 +109,30 @@ namespace AntonieMotors_XBCAD7319.Controllers
 
             return View(employee);
         }
+
+
+        [HttpPost]
+        public async Task<IActionResult> EditEmployee(EmployeeModel model)
+        {
+            string businessId = BusinessID.businessId;
+
+            try
+            {
+                // Update the employee data in Firebase
+                await _firebaseClient
+                    .Child($"Users/{businessId}/Employees/{model.EmployeeID}")
+                    .PutAsync(model);
+
+                TempData["SuccessMessage"] = "Employee details updated successfully!";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Error updating employee: {ex.Message}";
+            }
+
+            return RedirectToAction("EmployeeManagement");
+        }
+
 
         private async Task<EmployeeModel> GetEmployeeByIdAsync(string businessId, string employeeId)
         {
