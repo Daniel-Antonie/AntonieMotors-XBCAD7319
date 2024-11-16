@@ -1,0 +1,80 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Antonie Motors - Navbar</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        /* Navbar styling */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #1a1a1a;
+            color: #fff;
+        }
+
+            .navbar .brand {
+                font-size: 1.2rem;
+                font-weight: bold;
+                color: #fff;
+                text-decoration: none;
+            }
+
+            .navbar .nav-links {
+                display: flex;
+                gap: 20px;
+            }
+
+                .navbar .nav-links a {
+                    color: #fff;
+                    text-decoration: none;
+                    font-size: 1rem;
+                }
+
+                    .navbar .nav-links a:hover {
+                        text-decoration: underline;
+                    }
+
+            .navbar .register-btn {
+                background-color: #d9534f;
+                color: #fff;
+                border: none;
+                padding: 8px 15px;
+                border-radius: 5px;
+                font-size: 1rem;
+                cursor: pointer;
+                text-decoration: none;
+            }
+
+                .navbar .register-btn:hover {
+                    background-color: #c9302c;
+                }
+    </style>
+</head>
+
+
+<body>
+    <div class="navbar">
+        <a href="#" class="brand">Antonie Motors</a>
+        <div class="nav-links">
+            <a href="@Url.Action("Index", "Home")">Home</a>
+            <a href="@Url.Action("UserLogin", "Login")">Login</a>
+            <a href="@Url.Action("Register", "Customer")">Register</a>
+
+        </div>
+
+    </div>
+
+    <main>
+        @RenderBody() <!-- This is where the content of your page will go -->
+    </main>
+</body>
+</html>

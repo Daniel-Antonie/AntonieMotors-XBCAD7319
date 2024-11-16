@@ -76,15 +76,15 @@ namespace AntonieMotors_XBCAD7319.Controllers
 
                 // Filter employees by managerId
                 var filteredEmployees = employees
-                    .Where(e => e.Object.ManagerID == managerId)
+                    .Where(e => e.Object.managerID == managerId)
                     .Select(e => new EmployeeModel
                     {
                         EmployeeID = e.Key,
-                        FirstName = e.Object.FirstName,
-                        LastName = e.Object.LastName,
-                        Email = e.Object.Email,
-                        Phone = e.Object.Phone,
-                        ManagerID = e.Object.ManagerID
+                        firstName = e.Object.firstName,
+                        lastName = e.Object.lastName,
+                        email = e.Object.email,
+                        phone = e.Object.phone,
+                        managerID = e.Object.managerID
                     })
                     .ToList();
 
@@ -117,11 +117,11 @@ namespace AntonieMotors_XBCAD7319.Controllers
                 }
 
                 // Update properties from the form model
-                existingEmployee.FirstName = model.FirstName;
-                existingEmployee.LastName = model.LastName;
-                existingEmployee.Email = model.Email;
-                existingEmployee.Phone = model.Phone;
-                existingEmployee.ManagerID = model.ManagerID;
+                existingEmployee.firstName = model.firstName;
+                existingEmployee.lastName = model.lastName;
+                existingEmployee.email = model.email;
+                existingEmployee.phone = model.phone;
+                existingEmployee.managerID = model.managerID;
 
               
 
