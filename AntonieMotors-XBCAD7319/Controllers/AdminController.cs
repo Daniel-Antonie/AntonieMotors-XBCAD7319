@@ -76,15 +76,15 @@ namespace AntonieMotors_XBCAD7319.Controllers
 
                 // Filter employees by managerId
                 var filteredEmployees = employees
-                    .Where(e => e.Object.ManagerID == managerId)
+                    .Where(e => e.Object.managerID == managerId)
                     .Select(e => new EmployeeModel
                     {
                         EmployeeID = e.Key,
-                        FirstName = e.Object.FirstName,
-                        LastName = e.Object.LastName,
-                        Email = e.Object.Email,
-                        Phone = e.Object.Phone,
-                        ManagerID = e.Object.ManagerID
+                        firstName = e.Object.firstName,
+                        lastName = e.Object.lastName,
+                        email = e.Object.email,
+                        phone = e.Object.phone,
+                        managerID = e.Object.managerID
                     })
                     .ToList();
 
@@ -99,30 +99,36 @@ namespace AntonieMotors_XBCAD7319.Controllers
             }
         }
 
-        public async Task<IActionResult> EditEmployee(string id)
-        {
-            string businessId = BusinessID.businessId;
 
-            // Fetch the employee details from Firebase
-            var employee = await GetEmployeeByIdAsync(businessId, id);
-            if (employee == null)
-            {
-                return NotFound();
-            }
 
-            return View(employee);
-        }
         [HttpPost]
-        public async Task<IActionResult> EditEmployee(EmployeeModel model)
+        public async Task<IActionResult> EditEmployee(EmployeeModel model, IFormFile ProfileImage)
         {
             string businessId = BusinessID.businessId;
 
             try
             {
-                // Update the employee data in Firebase
+                // Fetch existing employee data to avoid overwriting other properties
+                var existingEmployee = await GetEmployeeByIdAsync(businessId, model.EmployeeID);
+                if (existingEmployee == null)
+                {
+                    TempData["ErrorMessage"] = "Employee not found!";
+                    return RedirectToAction("EmployeeManagement");
+                }
+
+                // Update properties from the form model
+                existingEmployee.firstName = model.firstName;
+                existingEmployee.lastName = model.lastName;
+                existingEmployee.email = model.email;
+                existingEmployee.phone = model.phone;
+                existingEmployee.managerID = model.managerID;
+
+              
+
+                // Update the employee data in Firebase with the modified data
                 await _firebaseClient
                     .Child($"Users/{businessId}/Employees/{model.EmployeeID}")
-                    .PutAsync(model);
+                    .PutAsync(existingEmployee);
 
                 TempData["SuccessMessage"] = "Employee details updated successfully!";
             }
@@ -133,6 +139,8 @@ namespace AntonieMotors_XBCAD7319.Controllers
 
             return RedirectToAction("EmployeeManagement");
         }
+
+     
 
         private async Task<EmployeeModel> GetEmployeeByIdAsync(string businessId, string employeeId)
         {

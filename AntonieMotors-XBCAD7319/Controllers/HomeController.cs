@@ -18,6 +18,18 @@ namespace AntonieMotors_XBCAD7319.Controllers
             return View();
         }
 
+        public IActionResult CarEngine()
+        {
+            return View();
+        }
+
+        public IActionResult CarPanelbeating()
+        {
+            return View();
+        }
+
+
+
         public IActionResult Privacy()
         {
             return View();

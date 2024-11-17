@@ -33,10 +33,10 @@
                     @foreach (var employee in Model)
                     {
                         <tr>
-                            <td>@employee.FirstName</td>
-                            <td>@employee.LastName</td>
-                            <td>@employee.Email</td>
-                            <td>@employee.Phone</td>
+                            <td>@employee.firstName</td>
+                            <td>@employee.lastName</td>
+                            <td>@employee.email</td>
+                            <td>@employee.phone</td>
                             <td>
                                 <a asp-action="EditEmployee" asp-route-id="@employee.EmployeeID" class="btn btn-primary">Edit</a>
                             </td>
