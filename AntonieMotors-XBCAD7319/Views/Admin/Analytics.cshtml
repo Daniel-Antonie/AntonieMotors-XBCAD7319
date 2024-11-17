@@ -16,7 +16,7 @@
     </div>
 
     <br/>
-    <!-- Analytics Content -->
+    <!-- Services Analytics Content -->
     <div class="card shadow-sm p-4 mb-4" style=" width:100%;">
         <div class="card-body text-center">
             <h2 class="text-success"><strong>Your Services</strong></h2>
@@ -44,6 +44,33 @@
             </div>
         </div>
     </div>
+
+    <br/>
+    <br/>
+
+    @* Employee Analytics *@
+    <div class="card shadow-sm p-4 mb-4" style=" width:100%;">
+        <div class="card-body text-center">
+            <h2 class="text-success"><strong>Your Employees</strong></h2>
+            <h3>Total Employees: <strong>@ViewBag.EmployeeCount</strong></h3>
+        </div>
+    </div>
+
+    <br/>
+
+    <!-- Employee Statuses Chart -->
+    <div class="row justify-content-center mb-4" style="width: 100%">
+        <div class="col-auto col-auto" >
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4 class="text-success text-center">Employee Types</h4>
+                    <canvas id="employeesChart" class="mt-3"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 </div>
 
 
@@ -88,6 +115,35 @@
                     backgroundColor: [
                         '#83D19E',
                         '#D05353'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                }
+            }
+        });
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const empCtx = document.getElementById('employeesChart').getContext('2d');
+        const myPieChart = new Chart(empCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Employee', 'Business Owner', 'Manager'],
+                datasets: [{
+                    data: [@ViewBag.NumEmployeeEmployee, @ViewBag.NumOwnerEmployee, @ViewBag.NumAdminEmployee],
+                    backgroundColor: [
+                     '#917C78',
+                     '#83D19E',
+                     '#495F41',
+                        
                     ],
                     borderWidth: 1
                 }]

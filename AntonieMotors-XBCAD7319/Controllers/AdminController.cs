@@ -4,6 +4,7 @@ using Firebase.Database;
 using Firebase.Database.Query;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using System.Net;
 
 namespace AntonieMotors_XBCAD7319.Controllers
 {
@@ -160,6 +161,8 @@ namespace AntonieMotors_XBCAD7319.Controllers
         {
             await getServicesAnalytics();
 
+            await getEmployeeAnalytics();
+
             return View();
         }
 
@@ -227,6 +230,45 @@ namespace AntonieMotors_XBCAD7319.Controllers
                 ViewBag.ErrorMessage = $"Error: {e.Message}";
             }
 
+        }
+
+        private async Task getEmployeeAnalytics()
+        {
+            try
+            {
+                var employees = await _firebaseClient
+                    .Child($"Users/{businessId}/Employees")
+                    .OnceAsync<dynamic>();
+
+                //total service count
+                int empCount = employees.Count();
+
+                ViewBag.EmployeeCount = empCount;
+
+                //counting different emplloyee types
+                int empEmpCount = employees.Count(employee =>
+                    employee.Object.role != null && employee.Object.role.ToString() == "employee");
+
+                ViewBag.NumEmployeeEmployee = empEmpCount;
+
+
+                int adminEmpCount = employees.Count(employee =>
+                    employee.Object.role != null && employee.Object.role.ToString() == "admin");
+
+                ViewBag.NumAdminEmployee = adminEmpCount;
+
+
+                int ownerEmpCount = employees.Count(employee =>
+                    employee.Object.role != null && employee.Object.role.ToString() == "owner");
+
+                ViewBag.NumOwnerEmployee = ownerEmpCount;
+
+                Console.WriteLine($"emps: {empEmpCount}, owners: {ownerEmpCount}, admins: {adminEmpCount}");
+            }
+            catch (Exception e)
+            {
+                ViewBag.ErrorMessage = $"Error: {e.Message}";
+            }
         }
 
         private async Task getAllServices()
