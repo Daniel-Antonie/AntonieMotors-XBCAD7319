@@ -49,29 +49,28 @@
                         Status: @service.Status
                     </p>
                     <div class="service-details">
-                        <div class="details-labels">
-                            <div>
-                                <p>Vehicle:</p>
-                            </div>
-                            <div class="vehicle-info">
-                                <p>Model:</p>
-                                <p>Number Plate:</p>
-                            </div>
-                            <p class="date-info">Date Taken In:</p>
-                            <p class="date-info">Date Vehicle Returned:</p>
-                            <div>
-                                <p style="color: #EE2F2E;">Total Cost:</p>
-                            </div>
-                        </div>
-                        <div class="details-values">
-                            <p>@service.Model</p>
-                            <p>@service.NumberPlate</p>
-                            <div class="date-values">
-                                <p>@service.DateTakenIn</p>
-                                <p>@service.DateReturned</p>
-                            </div>
-                            <p style="color: #EE2F2E;">@service.TotalCost</p>
-                        </div>
+                        <table style="width: 100%;">
+                            <tr>
+                                <td><strong>Vehicle:</strong></td>
+                                <td>@service.Model</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Number Plate:</strong></td>
+                                <td>@service.NumberPlate</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Date Taken In:</strong></td>
+                                <td>@service.DateTakenIn</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Date Vehicle Returned:</strong></td>
+                                <td>@service.DateReturned</td>
+                            </tr>
+                            <tr>
+                                <td><strong style="color: #EE2F2E;">Total Cost:</strong></td>
+                                <td style="color: #EE2F2E;">@service.TotalCost</td>
+                            </tr>
+                        </table>
                     </div>
                 </section>
             }
@@ -84,119 +83,6 @@
         }
 
 
-        @* <section class="service-card">
-        <h2 class="service-name">Service Name</h2>
-        <p class="status-badge-not-started">Status: Not Started</p>
-        <div class="service-details">
-        <div class="details-labels">
-        <div>
-        <p>Vehicle:</p>
-        </div>
-        <div class="vehicle-info">
-        <p>Model:</p>
-        <p>Number Plate:</p>
-        </div>
-        <p class="date-info">Date Taken In:</p>
-        <p class="date-info">Date Vehicle Returned:</p>
-        <div>
-        <p style="color: #EE2F2E;">Total Cost:</p>
-        </div>
-        </div>
-        <div class="details-values">
-        <p>Honda CRV 2008</p>
-        <p>HMR 665 GP</p>
-        <div class="date-values">
-        <p>15 September 2024</p>
-        <p>19 September 2024</p>
-        </div>
-        <p style="color: #EE2F2E;">R 2580,90</p>
-        </div>
-        </div>
-        </section>
-
-        <section class="service-card">
-        <h2 class="service-name">Service Name</h2>
-        <p class="status-badge-busy">Status: Busy</p>
-        <div class="service-details">
-        <div class="details-labels">
-        <p>Vehicle:</p>
-        <div class="vehicle-info">
-        <p>Model:</p>
-        <p>Number Plate:</p>
-        </div>
-        <p class="date-info">Date Taken In:</p>
-        <p class="date-info">Date Vehicle Returned:</p>
-        <div>
-        <p style="color: #EE2F2E;">Total Cost:</p>
-        </div>
-        </div>
-        <div class="details-values">
-        <p>Honda CRV 2008</p>
-        <p>HMR 665 GP</p>
-        <div class="date-values">
-        <p>15 September 2024</p>
-        <p>19 September 2024</p>
-        </div>
-        <p style="color: #EE2F2E;">R 2580,90</p>
-        </div>
-        </div>
-        </section>
-
-        <section class="service-card">
-        <h2 class="service-name">Service Name</h2>
-        <p class="status-badge-completed">Status: Completed</p>
-        <div class="service-details">
-        <div class="details-labels">
-        <p>Vehicle:</p>
-        <div class="vehicle-info">
-        <p>Model:</p>
-        <p>Number Plate:</p>
-        </div>
-        <p class="date-info">Date Taken In:</p>
-        <p class="date-info">Date Vehicle Returned:</p>
-        <div>
-        <p style="color: #EE2F2E;">Total Cost:</p>
-        </div>
-        </div>
-        <div class="details-values">
-        <p>Honda CRV 2008</p>
-        <p>HMR 665 GP</p>
-        <div class="date-values">
-        <p>15 September 2024</p>
-        <p>19 September 2024</p>
-        </div>
-        <p style="color: #EE2F2E;">R 2580,90</p>
-        </div>
-        </div>
-        </section>
-
-        <section class="service-card">
-        <h2 class="service-name">Service Name</h2>
-        <p class="status-badge-completed">Status: Completed</p>
-        <div class="service-details">
-        <div class="details-labels">
-        <p>Vehicle:</p>
-        <div class="vehicle-info">
-        <p>Model:</p>
-        <p>Number Plate:</p>
-        </div>
-        <p class="date-info">Date Taken In:</p>
-        <p class="date-info">Date Vehicle Returned:</p>
-        <div>
-        <p style="color: #EE2F2E;">Total Cost:</p>
-        </div>
-        </div>
-        <div class="details-values">
-        <p>Honda CRV 2008</p>
-        <p>HMR 665 GP</p>
-        <div class="date-values">
-        <p>15 September 2024</p>
-        <p>19 September 2024</p>
-        </div>
-        <p style="color: #EE2F2E;">R 2580,90</p>
-        </div>
-        </div>
-        </section> *@
     </div>
 
 </div>

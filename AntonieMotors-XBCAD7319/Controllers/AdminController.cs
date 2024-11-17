@@ -99,8 +99,6 @@ namespace AntonieMotors_XBCAD7319.Controllers
             }
         }
 
-
-
         public async Task<IActionResult> EditEmployee(string id)
         {
             string businessId = BusinessID.businessId;
@@ -114,8 +112,6 @@ namespace AntonieMotors_XBCAD7319.Controllers
 
             return View(employee);
         }
-
-
         [HttpPost]
         public async Task<IActionResult> EditEmployee(EmployeeModel model)
         {
@@ -138,7 +134,6 @@ namespace AntonieMotors_XBCAD7319.Controllers
             return RedirectToAction("EmployeeManagement");
         }
 
-
         private async Task<EmployeeModel> GetEmployeeByIdAsync(string businessId, string employeeId)
         {
             try
@@ -156,8 +151,6 @@ namespace AntonieMotors_XBCAD7319.Controllers
             }
         }
 
-
-
         public async Task<IActionResult> AnalyticsAsync()
         {
             //fetch analytics data to display
@@ -169,11 +162,13 @@ namespace AntonieMotors_XBCAD7319.Controllers
             return View();
         }
 
-        public IActionResult Services()
+        public async Task<IActionResult> Services()
         {
+            await getAllServices();
+
             return View();
         }
-        
+
         //fetches analytics data for services
         private async Task getServicesAnalytics()
         {
@@ -208,7 +203,127 @@ namespace AntonieMotors_XBCAD7319.Controllers
             {
                 ViewBag.ErrorMessage = $"Error: {e.Message}";
             }
-            
+
+        }
+
+        private async Task getAllServices()
+        {
+            try
+            {
+                var services = await _firebaseClient.Child($"Users/{BusinessID.businessId}/Services").OnceAsync<dynamic>();
+
+                if (services == null || !services.Any())
+                {
+                    ViewBag.Services = new List<dynamic>();
+                    return;
+                }
+
+                var serviceList = new List<dynamic>();
+
+                foreach (var service in services)
+                {
+
+                    // Fetching vehicle data
+                    string vehicleModel = await fetchVehicleModel((string)service.Object.vehicleID);
+                    string vehicleNumberPlate = await fetchVehicleNumPlate((string)service.Object.vehicleID);
+                    string custName = await fetchCustName((string)service.Object.custID);
+
+                    // Initialize date variables with "N/A"
+                    string dateTakenIn = "N/A";
+                    string dateReturned = "N/A";
+
+                    // Handle dateTakenIn if it's not null and has a time field (Unix timestamp)
+                    if (service.Object.dateReceived != null && service.Object.dateReceived.time != null)
+                    {
+                        long dateTakenInLong = (long)service.Object.dateReceived.time; // Get Unix timestamp
+                        DateTime dateTakenInDateTime = DateTimeOffset.FromUnixTimeMilliseconds(dateTakenInLong).DateTime; // Convert to DateTime
+                        dateTakenIn = dateTakenInDateTime.ToString("dd MMMM yyyy");
+                    }
+
+                    // Handle dateReturned if it's not null and has a time field (Unix timestamp)
+                    if (service.Object.dateReturned != null && service.Object.dateReturned.time != null)
+                    {
+                        long dateReturnedLong = (long)service.Object.dateReturned.time; // Get Unix timestamp
+                        DateTime dateReturnedDateTime = DateTimeOffset.FromUnixTimeMilliseconds(dateReturnedLong).DateTime; // Convert to DateTime
+                        dateReturned = dateReturnedDateTime.ToString("dd MMMM yyyy");
+                    }
+
+                    // Handling totalCost
+                    string totalCost = $"R {service.Object.totalCost}";
+
+                    // Add the service to the list
+                    serviceList.Add(new
+                    {
+                        Name = (string)service.Object.name, // Cast name to string
+                        Status = (string)service.Object.status, // Cast status to string
+                        Customer = custName,
+                        Model = vehicleModel,
+                        NumberPlate = vehicleNumberPlate,
+                        DateTakenIn = dateTakenIn,
+                        DateReturned = dateReturned,
+                        TotalCost = totalCost
+                    });
+                }
+
+
+                // Set services in ViewBag
+                ViewBag.Services = serviceList;
+                Console.WriteLine($"Services fetched: {serviceList.Count}");
+            }
+            catch (Exception e)
+            {
+                ViewBag.ErrorMessage = $"Error: {e.Message}";
+            }
+        }
+
+        private async Task<string> fetchVehicleNumPlate(dynamic vehicleID)
+        {
+            try
+            {
+                return await _firebaseClient.Child($"Users/{BusinessID.businessId}/Vehicles/{vehicleID}/vehicleNumPlate").OnceSingleAsync<String>();
+            }
+            catch (Exception e)
+            {
+                return "Could not load vehicle data";
+            }
+        }
+
+        private async Task<string> fetchVehicleModel(dynamic vehicleID)
+        {
+            string vehMakeModel = "Could not load vehicle data";
+
+            try
+            {
+                string vehMake = await _firebaseClient.Child($"Users/{BusinessID.businessId}/Vehicles/{vehicleID}/vehicleMake").OnceSingleAsync<String>();
+                string vehModel = await _firebaseClient.Child($"Users/{BusinessID.businessId}/Vehicles/{vehicleID}/vehicleModel").OnceSingleAsync<String>();
+
+                vehMakeModel = vehMake + " " + vehModel;
+            }
+            catch (Exception e)
+            {
+                ViewBag.ErrorMessage = $"Error: {e.Message}";
+            }
+
+            return vehMakeModel;
+        }
+
+        private async Task<string> fetchCustName(dynamic custID)
+        {
+            string fullName = "Could not load customer data";
+
+            try
+            {
+                string firstName = await _firebaseClient.Child($"Users/{BusinessID.businessId}/Customers/{custID}/CustomerName").OnceSingleAsync<String>();
+                string surname = await _firebaseClient.Child($"Users/{BusinessID.businessId}/Customers/{custID}/CustomerSurname").OnceSingleAsync<String>();
+
+                fullName = firstName + " " + surname;
+            }
+            catch (Exception e)
+            {
+                ViewBag.ErrorMessage = $"Error: {e.Message}";
+            }
+
+            return fullName;
         }
     }
 }
