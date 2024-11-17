@@ -62,7 +62,6 @@ namespace AntonieMotors_XBCAD7319.Controllers
             return View(employees);
         }
 
-
         private async Task<List<EmployeeModel>> GetEmployeesAsync(string businessId, string managerId)
         {
             try
@@ -101,7 +100,7 @@ namespace AntonieMotors_XBCAD7319.Controllers
 
 
 
-        [HttpPost]
+    [HttpPost]
         public async Task<IActionResult> EditEmployee(EmployeeModel model, IFormFile ProfileImage)
         {
             string businessId = BusinessID.businessId;
@@ -140,8 +139,6 @@ namespace AntonieMotors_XBCAD7319.Controllers
             return RedirectToAction("EmployeeManagement");
         }
 
-     
-
         private async Task<EmployeeModel> GetEmployeeByIdAsync(string businessId, string employeeId)
         {
             try
@@ -161,10 +158,6 @@ namespace AntonieMotors_XBCAD7319.Controllers
 
         public async Task<IActionResult> AnalyticsAsync()
         {
-            //fetch analytics data to display
-            ViewBag.NumServicesCompleted = null;
-            ViewBag.NumServicesPending = null; //im including both "not started" and "busy" services here
-
             await getServicesAnalytics();
 
             return View();
@@ -188,6 +181,11 @@ namespace AntonieMotors_XBCAD7319.Controllers
                     .Child($"Users/{businessId}/Services")
                     .OnceAsync<dynamic>();
 
+                //total service count
+                int serviceCount = services.Count();
+
+                ViewBag.ServiceCount = serviceCount;    
+
                 // Count services with status set to "Completed"
                 int completedServicesCount = services.Count(service =>
                     service.Object.status != null && service.Object.status.ToString() == "Completed");
@@ -206,6 +204,23 @@ namespace AntonieMotors_XBCAD7319.Controllers
                     service.Object.status != null && service.Object.status.ToString() == "Not Started");
 
                 ViewBag.NumServicesNotStarted = notStartedServicesCount;
+
+                //counting paid services
+                int paidServicesCount = services.Count(service =>
+                    Convert.ToBoolean(service.Object.paid.ToString()));
+
+                ViewBag.NumServicesPaid = paidServicesCount;
+
+                //counting unpaid services
+                int unpaidServicesCount = services.Count(service =>
+                    !Convert.ToBoolean(service.Object.paid.ToString()));
+
+                ViewBag.NumServicesUnpaid = unpaidServicesCount;
+
+                Console.WriteLine($"Paid: {paidServicesCount}, Unpaid: {unpaidServicesCount}");
+
+
+
             }
             catch (Exception e)
             {
