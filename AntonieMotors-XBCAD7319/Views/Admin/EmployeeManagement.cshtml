@@ -5,20 +5,34 @@
 }
 
 <div class="container-fluid" style="margin-left: 250px;">
-    <h2>Employee Management</h2>
-    <p>View and manage all employees under your management.</p>
+    <h2>Employees</h2>
+    <p>View all employees under your management.</p>
+
+    <!-- Search Form -->
+    <form method="get" action="/Admin/EmployeeManagement">
+        <div class="form-group row">
+            <div class="col-md-8">
+                <input type="text" name="searchQuery" class="form-control" placeholder="Search by name, email, or phone..." />
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+            <div class="col-md-2">
+                <a href="/Admin/EmployeeManagement" class="btn btn-secondary">Display All</a>
+            </div>
+        </div>
+    </form>
 
     <!-- Employee Table -->
     <div class="card">
         <table class="table table-bordered">
             <thead>
                 <tr>
-                   @*   <th>Employee ID</th>  *@
                     <th>First Name</th>
                     <th>Last Name</th>
                     <th>Email</th>
                     <th>Phone</th>
-                    <th>Actions</th>
+                    <th>Physical Address</th>
                 </tr>
             </thead>
             <tbody>
@@ -37,18 +51,15 @@
                             <td>@employee.lastName</td>
                             <td>@employee.email</td>
                             <td>@employee.phone</td>
-                            <td>
-                                <a asp-action="EditEmployee" asp-route-id="@employee.EmployeeID" class="btn btn-primary">Edit</a>
-                            </td>
+                            <td>@employee.address</td>
                         </tr>
                     }
                 }
             </tbody>
-
         </table>
     </div>
-
+@* 
     <footer>
         <p>&copy; 2024 - Antonie Motors - Privacy Policy</p>
-    </footer>
+    </footer> *@
 </div>

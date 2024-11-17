@@ -36,21 +36,148 @@ namespace AntonieMotors_XBCAD7319.Controllers
             return View();
         }
 
-        public IActionResult CustomerManagement()
+        public async Task<IActionResult> CustomerManagement(string searchQuery = "")
         {
-            return View();
+            string businessId = BusinessID.businessId; // Replace with the logged-in user's business ID
+            string managerId = BusinessID.userId; // Replace with the logged-in user's manager ID
+
+            Console.WriteLine($"BusinessID: {businessId}, ManagerID: {managerId}");
+
+            // Fetch customers asynchronously
+            var customers = await GetCustomersAsync(businessId, managerId);
+
+            // Filter customers based on the search query (case-insensitive)
+            if (!string.IsNullOrEmpty(searchQuery))
+            {
+                customers = customers.Where(c =>
+                    c.CustomerName.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                    c.CustomerSurname.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                    c.CustomerEmail.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                    c.CustomerMobileNum.Contains(searchQuery, StringComparison.OrdinalIgnoreCase)
+                ).ToList();
+            }
+
+            return View(customers);
         }
 
-        public IActionResult VehicleManagement()
+        private async Task<List<CustomerModel>> GetCustomersAsync(string businessId, string managerId)
         {
-            return View();
+            try
+            {
+                // Fetch customers under the businessId
+                var customers = await _firebaseClient
+                    .Child($"Users/{businessId}/Customers")
+                    .OnceAsync<CustomerModel>();
+
+                Console.WriteLine($"Fetched {customers.Count} customers from Firebase.");
+
+                // Filter customers by managerId if applicable
+                var filteredCustomers = customers
+                  
+                    .Select(c => new CustomerModel
+                    {
+                        CustomerName = c.Object.CustomerName,
+                        CustomerSurname = c.Object.CustomerSurname,
+                        CustomerEmail = c.Object.CustomerEmail,
+                        CustomerMobileNum = c.Object.CustomerMobileNum,
+                        CustomerAddress = c.Object.CustomerAddress,
+                        CustomerType = c.Object.CustomerType
+                    })
+                    .ToList();
+
+               // Console.WriteLine($"Filtered {filteredCustomers.Count} customers for ManagerID: {managerId}");
+                return filteredCustomers;
+            }
+            catch (Exception ex)
+            {
+                // Log the error (use ILogger for production scenarios)
+                Console.WriteLine($"Error fetching customers: {ex.Message}");
+                return new List<CustomerModel>();
+            }
         }
+
+
+
+
+        public async Task<IActionResult> VehicleManagement(string searchQuery = "")
+        {
+            string businessId = BusinessID.businessId; // Replace with the logged-in user's business ID
+            string managerId = BusinessID.userId; // Replace with the logged-in user's manager ID
+
+            Console.WriteLine($"BusinessID: {businessId}, ManagerID: {managerId}");
+
+            // Fetch vehicles asynchronously
+            var vehicles = await GetVehiclesAsync(businessId, managerId);
+
+            // Filter vehicles based on the search query (case-insensitive)
+            if (!string.IsNullOrEmpty(searchQuery))
+            {
+                vehicles = vehicles.Where(v =>
+                    v.vehicleNumPlate.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                    v.vehicleOwner.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                    v.vehicleMake.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                    v.vehicleModel.Contains(searchQuery, StringComparison.OrdinalIgnoreCase)
+                ).ToList();
+            }
+
+            return View(vehicles);
+        }
+
+        private async Task<List<VehicleModel>> GetVehiclesAsync(string businessId, string managerId)
+        {
+            try
+            {
+                // Fetch vehicle details under the businessId
+                var vehicles = await _firebaseClient
+                    .Child($"Users/{businessId}/Vehicles")
+                    .OnceAsync<VehicleModel>();
+
+                Console.WriteLine($"Fetched {vehicles.Count} vehicles from Firebase.");
+
+                var vehicleList = new List<VehicleModel>();
+
+                foreach (var v in vehicles)
+                {
+                    // Fetch the front image URL for each vehicle
+                    var frontImageUrls = await _firebaseClient
+                        .Child($"Users/{businessId}/Vehicles/{v.Key}/images/front")
+                        .OnceAsync<string>();
+
+                    // Take the first URL or set to null if none exist
+                    var frontImageURL = frontImageUrls.FirstOrDefault()?.Object;
+
+                    vehicleList.Add(new VehicleModel
+                    {
+                        vehicleNumPlate = v.Object.vehicleNumPlate,
+                        vehicleMake = v.Object.vehicleMake,
+                        vehicleModel = v.Object.vehicleModel,
+                        vehicleYear = v.Object.vehicleYear,
+                        vehicleKms = v.Object.vehicleKms,
+                        vinNumber = v.Object.vinNumber,
+                        vehicleOwner = v.Object.vehicleOwner,
+                        frontImageURL = frontImageURL
+                    });
+                }
+
+                return vehicleList;
+            }
+            catch (Exception ex)
+            {
+                // Log the error (use ILogger for production scenarios)
+                Console.WriteLine($"Error fetching vehicles: {ex.Message}");
+                return new List<VehicleModel>();
+            }
+        }
+
+
+
+
         public IActionResult InventoryManagement()
         {
             return View();
         }
 
-        public async Task<IActionResult> EmployeeManagement()
+        public async Task<IActionResult> EmployeeManagement(string searchQuery = "")
         {
             string businessId = BusinessID.businessId; // Replace with the logged-in user's business ID
             string managerId = BusinessID.userId; // Replace with logged-in user's manager ID
@@ -58,6 +185,18 @@ namespace AntonieMotors_XBCAD7319.Controllers
             Console.WriteLine($"BusinessID: {businessId}, ManagerID: {managerId}");
 
             var employees = await GetEmployeesAsync(businessId, managerId);
+
+            if (!string.IsNullOrEmpty(searchQuery))
+            {
+                // Filter employees based on the search query (case-insensitive)
+                employees = employees.Where(e =>
+                    e.firstName.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                    e.lastName.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                    e.email.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                    e.phone.Contains(searchQuery, StringComparison.OrdinalIgnoreCase)
+                ).ToList();
+            }
+
 
             return View(employees);
         }
@@ -84,7 +223,8 @@ namespace AntonieMotors_XBCAD7319.Controllers
                         lastName = e.Object.lastName,
                         email = e.Object.email,
                         phone = e.Object.phone,
-                        managerID = e.Object.managerID
+                        managerID = e.Object.managerID,
+                        address = e.Object.address
                     })
                     .ToList();
 
