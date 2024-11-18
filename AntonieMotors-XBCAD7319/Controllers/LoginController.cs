@@ -53,7 +53,7 @@ namespace AntonieMotors_XBCAD7319.Controllers
                         var role = employee.Object.role;
 
                         // Redirect based on role
-                        if (role == "admin")
+                        if (role == "admin" || role == "owner")
                         {
                             return RedirectToAction("Index", "Admin");
                         }
