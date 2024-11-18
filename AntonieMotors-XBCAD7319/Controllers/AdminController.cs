@@ -32,8 +32,9 @@ namespace AntonieMotors_XBCAD7319.Controllers
             return View();
         }
 
-        public IActionResult QuoteGenerator()
+        public async Task<IActionResult> QuoteGenerator()
         {
+            await fetchQuoteRequests();
             return View();
         }
 
@@ -74,7 +75,7 @@ namespace AntonieMotors_XBCAD7319.Controllers
 
                 // Filter customers by managerId if applicable
                 var filteredCustomers = customers
-                  
+
                     .Select(c => new CustomerModel
                     {
                         CustomerName = c.Object.CustomerName,
@@ -86,7 +87,7 @@ namespace AntonieMotors_XBCAD7319.Controllers
                     })
                     .ToList();
 
-               // Console.WriteLine($"Filtered {filteredCustomers.Count} customers for ManagerID: {managerId}");
+                // Console.WriteLine($"Filtered {filteredCustomers.Count} customers for ManagerID: {managerId}");
                 return filteredCustomers;
             }
             catch (Exception ex)
@@ -170,11 +171,15 @@ namespace AntonieMotors_XBCAD7319.Controllers
             }
         }
 
-
-
-
-        public IActionResult InventoryManagement()
+        public IActionResult LeaveManagement()
         {
+            return View();
+        }
+
+
+        public async Task<IActionResult> InventoryManagement()
+        {
+            await fetchInventory();
             return View();
         }
 
@@ -241,7 +246,7 @@ namespace AntonieMotors_XBCAD7319.Controllers
 
 
 
-    [HttpPost]
+        [HttpPost]
         public async Task<IActionResult> EditEmployee(EmployeeModel model, IFormFile ProfileImage)
         {
             string businessId = BusinessID.businessId;
@@ -263,7 +268,7 @@ namespace AntonieMotors_XBCAD7319.Controllers
                 existingEmployee.phone = model.phone;
                 existingEmployee.managerID = model.managerID;
 
-              
+
 
                 // Update the employee data in Firebase with the modified data
                 await _firebaseClient
@@ -327,7 +332,7 @@ namespace AntonieMotors_XBCAD7319.Controllers
                 //total service count
                 int serviceCount = services.Count();
 
-                ViewBag.ServiceCount = serviceCount;    
+                ViewBag.ServiceCount = serviceCount;
 
                 // Count services with status set to "Completed"
                 int completedServicesCount = services.Count(service =>
@@ -529,6 +534,131 @@ namespace AntonieMotors_XBCAD7319.Controllers
             }
 
             return fullName;
+        }
+
+        private async Task fetchQuoteRequests()
+        {
+            try
+            {
+                // Retrieve all quote requests stored under the business ID
+                var quoteRequestsResponse = await _firebaseClient
+                    .Child($"Users/{BusinessID.businessId}/QuoteRequests")
+                    .OnceAsync<QuoteRequestModel>();
+
+                var quoteRequestsList = new List<dynamic>();
+
+                // Iterate over the results and prepare the data for display
+                foreach (var quoteRequest in quoteRequestsResponse)
+                {
+                    quoteRequestsList.Add(new
+                    {
+                        CustomerName = quoteRequest.Object.CustomerName,
+                        CarMake = quoteRequest.Object.CarMake,
+                        CarModel = quoteRequest.Object.CarModel,
+                        Description = quoteRequest.Object.Description,
+                        PhoneNumber = quoteRequest.Object.PhoneNumber,
+                        RequestId = quoteRequest.Key // Firebase unique key
+                    });
+                }
+
+                // Pass the data to the view
+                ViewBag.quoteRequests = quoteRequestsList;
+            }
+            catch (Exception e)
+            {
+                // Handle and log errors
+                ViewBag.ErrorMessage = $"Error: {e.Message}";
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteQuoteRequest(string requestId)
+        {
+            try
+            {
+                // Delete the quote request from Firebase
+                await _firebaseClient
+                    .Child($"Users/{BusinessID.businessId}/QuoteRequests/{requestId}")
+                    .DeleteAsync();
+
+                TempData["SuccessMessage"] = "Quote request marked as done.";
+            }
+            catch (Exception e)
+            {
+                TempData["ErrorMessage"] = $"Error: {e.Message}";
+            }
+
+            // Refresh the list of quote requests
+            await fetchQuoteRequests();
+            return RedirectToAction("QuoteGenerator");
+        }
+
+        private async Task fetchInventory()
+        {
+            try
+            {
+                var inventoryResponse = await _firebaseClient.Child($"Users/{BusinessID.businessId}/parts").OnceAsync<dynamic>();
+
+                var inventoryList = new List<dynamic>();
+
+                foreach (var part in inventoryResponse)
+                {
+                    inventoryList.Add(new
+                    {
+                        partName = part.Object.partName,
+                        costPrice = part.Object.costPrice,
+                        stockCount = part.Object.stockCount
+                    });
+                }
+
+                ViewBag.inventory = inventoryList;
+            }
+            catch (Exception e)
+            {
+                ViewBag.ErrorMessage = $"Error: {e.Message}";
+            }
+        }
+
+        public IActionResult Logout()
+        {
+            // Log out the user
+            Response.Cookies.Delete(".AspNetCore.Identity.Application");
+
+            // Redirect to a confirmation page or homepage
+            return RedirectToAction("Index", "Home");
+        }
+
+        public async Task<IActionResult> SendPasswordResetEmail()
+        {
+            await _authProvider.SendPasswordResetEmailAsync(BusinessID.email);
+            Console.WriteLine("Email sent successfully");
+            return RedirectToAction("Account", "Admin");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteAccount()
+        {
+            try
+            {
+                string userId = BusinessID.userId;
+                string businessId = BusinessID.businessId;
+
+                // Delete customer data from Firebase
+                await _firebaseClient.Child($"Users/{businessId}/Employees/{userId}").DeleteAsync();
+
+                return Logout();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting account: {ex.Message}");
+                TempData["ErrorMessage"] = "Unable to delete account. Please try again.";
+                return RedirectToAction("Account", "Admin");
+            }
+        }
+
+        public IActionResult Account()
+        {
+            return View();
         }
     }
 }

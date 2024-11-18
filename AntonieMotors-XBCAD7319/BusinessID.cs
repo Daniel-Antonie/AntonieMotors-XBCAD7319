@@ -8,6 +8,7 @@
 
         //for storing the userID for their session
         public static string userId;
+        public static string email;
 
     }
 }

@@ -1,0 +1,34 @@
+﻿/* Add green border around each box (card) */
+.card {
+    border: 2px solid green;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease-in-out;
+}
+
+    /* Add hover effect */
+    .card:hover {
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+
+/* Additional styling for the card elements */
+.card-img-top {
+    width: 100%;
+    height: auto;
+}
+
+.card-body {
+    padding: 15px;
+}
+
+.btn-group .btn {
+    margin-right: 5px;
+}
+
+.text-muted {
+    color: #6c757d;
+}
+
+.container {
+    padding: 15px;
+}

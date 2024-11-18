@@ -123,13 +123,16 @@
                     <i class="fas fa-tachometer-alt"></i> Home
                 </a>
                 <a href="@Url.Action("QuoteGenerator", "Admin")" class="list-group-item list-group-item-action">
-                    <i class="fas fa-file-signature"></i> Quote Generator
+                    <i class="fas fa-file-signature"></i> Quote Requests
                 </a>
                 <a href="@Url.Action("CustomerManagement", "Admin")" class="list-group-item list-group-item-action">
                     <i class="fas fa-user-friends"></i> Customers
                 </a>
                 <a href="@Url.Action("EmployeeManagement", "Admin")" class="list-group-item list-group-item-action">
                     <i class="fas fa-user-tie"></i> Employees
+                </a>
+                <a href="@Url.Action("LeaveManagement", "Admin")" class="list-group-item list-group-item-action">
+                    <i class="fas fa-user-tie"></i> Leave
                 </a>
                 <a href="@Url.Action("VehicleManagement", "Admin")" class="list-group-item list-group-item-action">
                     <i class="fas fa-car-alt"></i> Vehicles
@@ -148,17 +151,11 @@
             <hr class="my-3">
             <div class="sidebar-heading">My Profile</div>
             <div class="list-group list-group-flush">
-                <a href="@Url.Action("MyProfile", "Admin")" class="list-group-item list-group-item-action">
-                    <i class="fas fa-user"></i> My Profile
+                <a href="@Url.Action("Account", "Admin")" class="list-group-item list-group-item-action">
+                    <i class="fas fa-user"></i> Account Settings
                 </a>
                 <a href="@Url.Action("Logout", "Admin")" class="list-group-item list-group-item-action">
                     <i class="fas fa-sign-out-alt"></i> Logout
-                </a>
-                <a href="@Url.Action("ChangePassword", "Admin")" class="list-group-item list-group-item-action">
-                    <i class="fas fa-lock"></i> Change Password
-                </a>
-                <a href="@Url.Action("DeleteAccount", "Admin")" class="list-group-item list-group-item-action text-danger">
-                    <i class="fas fa-user-slash"></i> Delete Account
                 </a>
             </div>
         </div>

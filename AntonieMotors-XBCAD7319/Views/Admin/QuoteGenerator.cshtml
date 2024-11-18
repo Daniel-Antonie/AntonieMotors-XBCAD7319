@@ -2,18 +2,66 @@
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="container-fluid" style="margin-left: 250px;">
-<h1>Quote Generator</h1>
-<form>
-    <div class="form-group">
-        <label for="serviceSelection">Select Service:</label>
-        <select class="form-control" id="serviceSelection">
-            <option>Service 1</option>
-            <option>Service 2</option>
-            <option>Service 3</option>
-        </select>
-    </div>
-    <button type="submit" class="btn btn-primary">Generate Quote</button>
-</form>
+<div class="container-fluid">
+    <h1>Quote Request Management</h1>
+    <p>Manage all quote requests.</p>
 
+    @if (ViewBag.quoteRequests != null)
+    {
+        <table class="table table-bordered custom-table">
+            <thead>
+                <tr>
+                    <th>Customer Name</th>
+                    <th>Make/Model</th>
+                    <th>Description</th>
+                    <th>Phone Number</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var quoteRequest in ViewBag.quoteRequests)
+                {
+                    <tr>
+                        <td>@quoteRequest.CustomerName</td>
+                        <td>@quoteRequest.CarMake @quoteRequest.CarModel</td>
+                        <td>@quoteRequest.Description</td>
+                        <td>@quoteRequest.PhoneNumber</td>
+                        <td>
+                            <form asp-action="DeleteQuoteRequest" method="post">
+                                <input type="hidden" name="requestId" value="@quoteRequest.RequestId" />
+                                <button type="submit" class="btn btn-success">Mark as Done</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>No quote requests found.</p>
+    }
 </div>
+
+<!-- CSS Styles Block -->
+<style>
+    .custom-table {
+        border: 2px solid #000; /* Adds a border around the entire table */
+        width: 100%;
+        margin: 0 auto;
+    }
+
+        .custom-table thead th {
+            text-align: center;
+            vertical-align: middle; /* Centers the text in header cells */
+        }
+
+        .custom-table tbody td {
+            text-align: center; /* Centers text horizontally in the cells */
+            vertical-align: middle; /* Aligns text vertically to the middle */
+        }
+
+        .custom-table .btn-success {
+            margin: 0 auto; /* Centers the button */
+        }
+</style>
