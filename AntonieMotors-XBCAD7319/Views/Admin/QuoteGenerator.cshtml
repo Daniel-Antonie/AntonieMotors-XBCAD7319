@@ -3,12 +3,14 @@
 }
 
 <div class="container-fluid">
-    <h1>Quote Request Management</h1>
-    <p>Manage all quote requests.</p>
+    <h1 style="font-family: Arial, sans-serif; color: #333; margin-bottom: 20px;">Quote Request Management</h1>
+    <p style="font-family: Arial, sans-serif; color: #666; font-size: 16px; margin-bottom: 20px;">
+        Manage all quote requests below. Click "Mark as Done" to process a request.
+    </p>
 
     @if (ViewBag.quoteRequests != null)
     {
-        <table class="table table-bordered custom-table">
+        <table class="table custom-table">
             <thead>
                 <tr>
                     <th>Customer Name</th>
@@ -39,29 +41,75 @@
     }
     else
     {
-        <p>No quote requests found.</p>
+        <p class="no-requests-text">No quote requests found at this time.</p>
     }
 </div>
 
-<!-- CSS Styles Block -->
+
 <style>
-    .custom-table {
-        border: 2px solid #000; /* Adds a border around the entire table */
-        width: 100%;
-        margin: 0 auto;
+   
+    .container-fluid {
+        background-color: #F5F5DC; 
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     }
 
-        .custom-table thead th {
+  
+    .custom-table {
+        width: 100%;
+        margin: 0 auto;
+        border-collapse: collapse;
+        background-color: #ffffff;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+        .custom-table th {
+            background-color: #9DC183; 
+            color: white;
+            font-weight: bold;
+            padding: 12px;
             text-align: center;
-            vertical-align: middle; /* Centers the text in header cells */
+            border-bottom: 2px solid #ddd;
         }
 
-        .custom-table tbody td {
-            text-align: center; /* Centers text horizontally in the cells */
-            vertical-align: middle; /* Aligns text vertically to the middle */
+        .custom-table td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+            font-family: Arial, sans-serif;
+            color: #333;
         }
 
-        .custom-table .btn-success {
-            margin: 0 auto; /* Centers the button */
+        .custom-table tr:hover {
+            background-color: #e8f5e9; 
         }
+
+   
+    .btn-success {
+        background-color: #9DC183;
+        border-color: #7CB368;
+        color: white;
+        padding: 8px 16px;
+        font-size: 14px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+        .btn-success:hover {
+            background-color: #82a464;
+            transform: scale(1.05); 
+        }
+
+    
+    .no-requests-text {
+        font-family: Arial, sans-serif;
+        font-size: 16px;
+        color: #888;
+        text-align: center;
+        margin-top: 20px;
+    }
 </style>

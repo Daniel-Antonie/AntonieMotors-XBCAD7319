@@ -5,42 +5,86 @@
 @model QuoteRequestModel
 
 <div class="container-fluid" style="margin-left: 250px;">
-    <h1>Request a Quote</h1>
+    <div class="container-fluid" style="max-width: 800px; margin: 0 auto; padding: 20px;">
+        <h1 style="font-family: Arial, sans-serif; color: #2E4B42; text-align: center; margin-bottom: 30px;">
+            Request a Quote
+        </h1>
 
-    @if (TempData["SuccessMessage"] != null)
-    {
-            <div class="alert alert-success">
-            @TempData["SuccessMessage"]
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success" style="font-size: 16px; text-align: center; background-color: #D5E8D4; border-color: #C8E1C2; color: #2E4B42; border-radius: 8px;">
+                @TempData["SuccessMessage"]
             </div>
-    }
+        }
 
-    @if (TempData["ErrorMessage"] != null)
-    {
-            <div class="alert alert-danger">
-            @TempData["ErrorMessage"]
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger" style="font-size: 16px; text-align: center; background-color: #F8D7DA; border-color: #F5C6CB; color: #721C24; border-radius: 8px;">
+                @TempData["ErrorMessage"]
             </div>
-    }
+        }
 
-    <form asp-action="SendQuoteRequest" method="post">
-        <input type="hidden" asp-for="CustomerId" />
+        <form asp-action="SendQuoteRequest" method="post" style="background-color: #F7F9F7; border-radius: 12px; padding: 25px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);">
+            <input type="hidden" asp-for="CustomerId" />
 
-        <div class="form-group">
-            <label asp-for="CarMake">Make of Car</label>
-            <input class="form-control" asp-for="CarMake" />
-        </div>
-        <div class="form-group">
-            <label asp-for="CarModel">Model of Car</label>
-            <input class="form-control" asp-for="CarModel" />
-        </div>
-        <div class="form-group">
-            <label asp-for="Description">Description for the quote</label>
-            <input class="form-control" asp-for="Description" />
-        </div>
-        <div class="form-group">
-            <label asp-for="PhoneNumber">Please Enter a phone number</label>
-            <input class="form-control" asp-for="PhoneNumber" />
-        </div>
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label asp-for="CarMake" style="font-weight: bold; font-size: 16px; color: #2E4B42;">Make of Car</label>
+                <input class="form-control" asp-for="CarMake" style="padding: 10px; font-size: 16px; border: 1px solid #C8E1C2;" />
+            </div>
 
-        <button type="submit" class="btn btn-primary">Submit</button>
-    </form>
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label asp-for="CarModel" style="font-weight: bold; font-size: 16px; color: #2E4B42;">Model of Car</label>
+                <input class="form-control" asp-for="CarModel" style="padding: 10px; font-size: 16px; border: 1px solid #C8E1C2;" />
+            </div>
+
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label asp-for="Description" style="font-weight: bold; font-size: 16px; color: #2E4B42;">Description for the quote</label>
+                <input class="form-control" asp-for="Description" style="padding: 10px; font-size: 16px; border: 1px solid #C8E1C2;" />
+            </div>
+
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label asp-for="PhoneNumber" style="font-weight: bold; font-size: 16px; color: #2E4B42;">Please Enter a Phone Number</label>
+                <input class="form-control" asp-for="PhoneNumber" style="padding: 10px; font-size: 16px; border: 1px solid #C8E1C2;" />
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 18px; background-color: #2E4B42; border-color: #2E4B42; color: #FFFFFF; border-radius: 8px;">
+                Submit
+            </button>
+        </form>
+    </div>
 </div>
+
+<!-- CSS Styles Block -->
+<style>
+    .form-group label {
+        color: #2E4B42;
+    }
+
+    .form-control:focus {
+        border-color: #2E4B42;
+        box-shadow: 0 0 5px rgba(46, 75, 66, 0.5);
+    }
+
+    .alert-success {
+        background-color: #D5E8D4;
+        border-color: #C8E1C2;
+        color: #2E4B42;
+        margin-bottom: 20px;
+        padding: 10px;
+        border-radius: 8px;
+    }
+
+    .alert-danger {
+        background-color: #F8D7DA;
+        border-color: #F5C6CB;
+        color: #721C24;
+        margin-bottom: 20px;
+        padding: 10px;
+        border-radius: 8px;
+    }
+
+    .btn-primary:hover {
+        background-color: #245D4F;
+        border-color: #245D4F;
+    }
+</style>
