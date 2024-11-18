@@ -8,11 +8,15 @@
 
     <!-- do ur code in here like in this div-->
     <h1>Services</h1>
-    @* <p>Search and view details of all registered customers.</p> *@
-    @* <form class="form-inline">
-        <input type="text" class="form-control mr-sm-2" placeholder="Search Customers" aria-label="Search" />
+    <p>Search and view details of all registered customers.</p> 
+    <form method="get" action="/Admin/Services" class="form-inline">
+        <input type="text" name="searchQuery" class="form-control mr-sm-2" placeholder="Search by service info... " aria-label="Search" />
         <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-    </form> *@
+
+        <div class="col-md-2">
+            <a href="/Admin/Services" class="btn btn-secondary">Display All</a>
+        </div>
+    </form> 
 
     <div class="service-cards-container">
         @if (ViewBag.Services != null)

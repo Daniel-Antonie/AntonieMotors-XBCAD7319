@@ -99,8 +99,6 @@ namespace AntonieMotors_XBCAD7319.Controllers
         }
 
 
-
-
         public async Task<IActionResult> VehicleManagement(string searchQuery = "")
         {
             string businessId = BusinessID.businessId; // Replace with the logged-in user's business ID
@@ -243,9 +241,6 @@ namespace AntonieMotors_XBCAD7319.Controllers
                 return new List<EmployeeModel>();
             }
         }
-
-
-
         [HttpPost]
         public async Task<IActionResult> EditEmployee(EmployeeModel model, IFormFile ProfileImage)
         {
@@ -311,12 +306,39 @@ namespace AntonieMotors_XBCAD7319.Controllers
             return View();
         }
 
-        public async Task<IActionResult> Services()
-        {
-            await getAllServices();
+        public async Task<IActionResult> Services(string searchQuery = "")
+{
+    try
+    {
+        // Fetch all services
+        var services = await FetchAllServicesAsync(BusinessID.businessId);
 
-            return View();
+        // Filter services if a search query is provided
+        if (!string.IsNullOrEmpty(searchQuery))
+        {
+            services = services.Where(service =>
+                service.Customer.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                service.Model.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                service.NumberPlate.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                service.Name.Contains(searchQuery, StringComparison.OrdinalIgnoreCase)
+            ).ToList();
         }
+
+        // Pass the services to the view using ViewBag
+        ViewBag.Services = services;
+
+        return View();
+    }
+    catch (Exception ex)
+    {
+        // Log and handle errors
+        Console.WriteLine($"Error in Services method: {ex.Message}");
+        ViewBag.ErrorMessage = "An error occurred while fetching services.";
+        ViewBag.Services = null;
+        return View();
+    }
+}
+
 
         //fetches analytics data for services
         private async Task getServicesAnalytics()
@@ -416,56 +438,34 @@ namespace AntonieMotors_XBCAD7319.Controllers
             }
         }
 
-        private async Task getAllServices()
+        private async Task<List<dynamic>> FetchAllServicesAsync(string businessId)
         {
             try
             {
-                var services = await _firebaseClient.Child($"Users/{BusinessID.businessId}/Services").OnceAsync<dynamic>();
-
-                if (services == null || !services.Any())
-                {
-                    ViewBag.Services = new List<dynamic>();
-                    return;
-                }
+                var services = await _firebaseClient.Child($"Users/{businessId}/Services").OnceAsync<dynamic>();
 
                 var serviceList = new List<dynamic>();
 
                 foreach (var service in services)
                 {
-
-                    // Fetching vehicle data
                     string vehicleModel = await fetchVehicleModel((string)service.Object.vehicleID);
                     string vehicleNumberPlate = await fetchVehicleNumPlate((string)service.Object.vehicleID);
                     string custName = await fetchCustName((string)service.Object.custID);
 
-                    // Initialize date variables with "N/A"
-                    string dateTakenIn = "N/A";
-                    string dateReturned = "N/A";
+                    string dateTakenIn = service.Object.dateReceived?.time != null
+                        ? DateTimeOffset.FromUnixTimeMilliseconds((long)service.Object.dateReceived.time).ToString("dd MMMM yyyy")
+                        : "N/A";
 
-                    // Handle dateTakenIn if it's not null and has a time field (Unix timestamp)
-                    if (service.Object.dateReceived != null && service.Object.dateReceived.time != null)
-                    {
-                        long dateTakenInLong = (long)service.Object.dateReceived.time; // Get Unix timestamp
-                        DateTime dateTakenInDateTime = DateTimeOffset.FromUnixTimeMilliseconds(dateTakenInLong).DateTime; // Convert to DateTime
-                        dateTakenIn = dateTakenInDateTime.ToString("dd MMMM yyyy");
-                    }
+                    string dateReturned = service.Object.dateReturned?.time != null
+                        ? DateTimeOffset.FromUnixTimeMilliseconds((long)service.Object.dateReturned.time).ToString("dd MMMM yyyy")
+                        : "N/A";
 
-                    // Handle dateReturned if it's not null and has a time field (Unix timestamp)
-                    if (service.Object.dateReturned != null && service.Object.dateReturned.time != null)
-                    {
-                        long dateReturnedLong = (long)service.Object.dateReturned.time; // Get Unix timestamp
-                        DateTime dateReturnedDateTime = DateTimeOffset.FromUnixTimeMilliseconds(dateReturnedLong).DateTime; // Convert to DateTime
-                        dateReturned = dateReturnedDateTime.ToString("dd MMMM yyyy");
-                    }
-
-                    // Handling totalCost
                     string totalCost = $"R {service.Object.totalCost}";
 
-                    // Add the service to the list
                     serviceList.Add(new
                     {
-                        Name = (string)service.Object.name, // Cast name to string
-                        Status = (string)service.Object.status, // Cast status to string
+                        Name = (string)service.Object.name,
+                        Status = (string)service.Object.status,
                         Customer = custName,
                         Model = vehicleModel,
                         NumberPlate = vehicleNumberPlate,
@@ -475,16 +475,15 @@ namespace AntonieMotors_XBCAD7319.Controllers
                     });
                 }
 
-
-                // Set services in ViewBag
-                ViewBag.Services = serviceList;
-                Console.WriteLine($"Services fetched: {serviceList.Count}");
+                return serviceList;
             }
             catch (Exception e)
             {
-                ViewBag.ErrorMessage = $"Error: {e.Message}";
+                Console.WriteLine($"Error fetching services: {e.Message}");
+                return new List<dynamic>();
             }
         }
+
 
         private async Task<string> fetchVehicleNumPlate(dynamic vehicleID)
         {
@@ -660,5 +659,7 @@ namespace AntonieMotors_XBCAD7319.Controllers
         {
             return View();
         }
+
+
     }
 }
