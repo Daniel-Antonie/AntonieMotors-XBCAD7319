@@ -6,6 +6,7 @@ using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Security.Claims;
 using AntonieMotors_XBCAD7319.Models;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 
@@ -26,8 +27,8 @@ namespace AntonieMotors_XBCAD7319.Controllers
             // Initialize Firebase objects
             _authProvider = new FirebaseAuthProvider(new FirebaseConfig(apiKey));
             _firebaseClient = new FirebaseClient(databaseUrl);
-        
-        TestFirebaseConnection();
+
+            TestFirebaseConnection();
         }
 
         public async Task<IActionResult> TestFirebaseConnection()
@@ -59,7 +60,7 @@ namespace AntonieMotors_XBCAD7319.Controllers
             return View(new CustomerModel());
         }
 
-      
+
 
         [HttpPost]
         public async Task<IActionResult> Register(CustomerModel customer, string customerPassword, string confirmPassword)
@@ -161,7 +162,6 @@ namespace AntonieMotors_XBCAD7319.Controllers
         {
             return View();
         }
-
         public async Task<IActionResult> ServiceHistory()
         {
             await getAllServices();
@@ -169,12 +169,47 @@ namespace AntonieMotors_XBCAD7319.Controllers
             return View();
         }
 
+        public async Task<IActionResult> SendPasswordResetEmail()
+        {
+            await _authProvider.SendPasswordResetEmailAsync(BusinessID.email);
+            Console.WriteLine("Email sent successfully");
+            return View("Account");
+        }
 
+        [HttpPost]
+        public async Task<IActionResult> DeleteAccount()
+        {
+            try
+            {
+                string userId = BusinessID.userId;
+                string businessId = BusinessID.businessId;
 
-        //public IActionResult AnotherOption()
-        //{
-        //    return View();
-        //}
+                // Delete customer data from Firebase
+                await _firebaseClient.Child($"Users/{businessId}/Customers/{userId}").DeleteAsync();
+
+                return Logout();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting account: {ex.Message}");
+                TempData["ErrorMessage"] = "Unable to delete account. Please try again.";
+                return RedirectToAction("Account", "Customer");
+            }
+        }
+
+        public IActionResult Account()
+        {
+            return View();
+        }
+
+        public IActionResult Logout()
+        {
+            // Log out the user
+            Response.Cookies.Delete(".AspNetCore.Identity.Application");
+
+            // Redirect to a confirmation page or homepage
+            return RedirectToAction("Index", "Home");
+        }
 
         //public IActionResult Analytics()
         //{
@@ -301,6 +336,66 @@ namespace AntonieMotors_XBCAD7319.Controllers
             return fullName;
         }
 
-       
+        [HttpPost]
+        public async Task<IActionResult> SendQuoteRequest(QuoteRequestModel model)
+        {
+            model.CustomerId = BusinessID.userId;
+
+            try
+            {
+                // Fetch the customer's name
+                var customerName = await _firebaseClient
+                    .Child($"Users/{BusinessID.businessId}/Customers/{model.CustomerId}/CustomerName")
+                    .OnceSingleAsync<string>();
+
+                if (!string.IsNullOrEmpty(customerName))
+                {
+                    model.CustomerName = customerName; // Populate the model with the customer's name
+
+                    // Construct path to save under the customer's name
+                    var path = $"Users/{BusinessID.businessId}/QuoteRequests";
+
+                    // Save the quote request to Firebase
+                    var result = await _firebaseClient
+                        .Child(path)
+                        .PostAsync(model);
+
+                    if (result != null)
+                    {
+                        Console.WriteLine("Data saved successfully to Firebase.");
+                        TempData["SuccessMessage"] = "Request sent successfully.";
+                    }
+                    else
+                    {
+                        Console.WriteLine("Failed to save data to Firebase.");
+                        TempData["ErrorMessage"] = "Failed to send the request. Please try again.";
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Customer name not found.");
+                    TempData["ErrorMessage"] = "Failed to fetch customer details. Please try again.";
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error saving data to Firebase: {ex.Message}");
+                TempData["ErrorMessage"] = "An error occurred while sending the request.";
+            }
+
+            // Clear model state to reset the form fields
+            ModelState.Clear();
+            return View("QuoteGeneratorCust");
+        }
     }
+}
+
+        public class QuoteRequestModel
+{
+    public string CustomerId { get; set; }
+    public string CustomerName { get; set; }
+    public string CarMake { get; set; }
+    public string CarModel { get; set; }
+    public string Description { get; set; }
+    public string PhoneNumber { get; set; }
 }

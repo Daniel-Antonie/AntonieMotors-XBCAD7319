@@ -64,7 +64,7 @@
                 }
 
         #sidebar-wrapper .sidebar-heading {
-            font-size: 1.5rem;
+            font-size: 1em;
             padding: 1rem;
             border-bottom: 1px solid #fff;
             color: white;
@@ -108,7 +108,6 @@
             <!-- Business logo and name -->
             <div class="sidebar-logo">
                 <img src="~/Images/amlogo.jpg" alt="Business Logo" />
-                <h3>Antonie Motors</h3>
             </div>
 
             <div class="sidebar-heading">Client Dashboard</div>
@@ -132,17 +131,14 @@
                     <i class="fas fa-chart-line"></i> Analytics
                 </a> *@
             </div>
-            <hr class="my-3"> <!-- Divider line -->
+            <hr class="my-1"> <!-- Divider line -->
             <div class="sidebar-heading">My Profile</div>
             <div class="list-group list-group-flush">
-                <a href="#" class="list-group-item list-group-item-action">
+                <a href="@Url.Action("Account", "Customer")" class="list-group-item list-group-item-action">
+                    <i class="fas fa-user"></i>Account Settings
+                </a>
+                <a href="@Url.Action("Logout", "Customer")" class="list-group-item list-group-item-action">
                     <i class="fas fa-sign-out-alt"></i> Logout
-                </a>
-                <a href="#" class="list-group-item list-group-item-action">
-                    <i class="fas fa-key"></i> Change Password
-                </a>
-                <a href="#" class="list-group-item list-group-item-action text-danger">
-                    <i class="fas fa-trash-alt"></i> Delete Account
                 </a>
             </div>
         </div>

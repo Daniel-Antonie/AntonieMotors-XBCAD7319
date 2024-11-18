@@ -2,18 +2,38 @@
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="container-fluid" style="margin-left: 250px;">
-<h1>Quote Generator</h1>
-<form>
-    <div class="form-group">
-        <label for="serviceSelection">Select Service:</label>
-        <select class="form-control" id="serviceSelection">
-            <option>Service 1</option>
-            <option>Service 2</option>
-            <option>Service 3</option>
-        </select>
-    </div>
-    <button type="submit" class="btn btn-primary">Generate Quote</button>
-</form>
-
+<div class="container-fluid">
+    <h1>Quote Request Management</h1>
+    <p>Manage all quote requests.</p>
+    <table class="table" style="border: 1px solid black; border-collapse: collapse;">
+        <thead style="border: 1px solid black;">
+            <tr>
+                <th style="border: 1px solid black;">Customer Name</th>
+                <th style="border: 1px solid black;">Make/Model</th>
+                <th style="border: 1px solid black;">Description</th>
+                <th style="border: 1px solid black;">Phone Number</th>
+                <th style="border: 1px solid black;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (ViewBag.quoteRequests != null)
+            {
+                foreach (var quoteRequest in ViewBag.quoteRequests)
+                {
+                    <tr style="border: 1px solid black;">
+                        <td style="border: 1px solid black;">@quoteRequest.CustomerName</td>
+                        <td style="border: 1px solid black;">@quoteRequest.CarMake @quoteRequest.CarModel</td>
+                        <td style="border: 1px solid black;">@quoteRequest.Description</td>
+                        <td style="border: 1px solid black;">@quoteRequest.PhoneNumber</td>
+                        <td style="border: 1px solid black;">
+                            <form asp-action="MarkAsDone" method="post" style="display:inline;">
+                                <input type="hidden" name="customerId" value="@quoteRequest.CustomerId" />
+                                <button type="submit" class="btn btn-success btn-sm">Mark as Done</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
 </div>

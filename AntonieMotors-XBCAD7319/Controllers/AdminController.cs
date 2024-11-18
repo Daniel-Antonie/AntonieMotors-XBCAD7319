@@ -31,8 +31,9 @@ namespace AntonieMotors_XBCAD7319.Controllers
             return View();
         }
 
-        public IActionResult QuoteGenerator()
+        public async Task<IActionResult> QuoteGenerator()
         {
+            await fetchQuoteRequests();
             return View();
         }
 
@@ -45,8 +46,9 @@ namespace AntonieMotors_XBCAD7319.Controllers
         {
             return View();
         }
-        public IActionResult InventoryManagement()
+        public async Task<IActionResult> InventoryManagement()
         {
+            await fetchInventory();
             return View();
         }
 
@@ -123,7 +125,7 @@ namespace AntonieMotors_XBCAD7319.Controllers
                 existingEmployee.phone = model.phone;
                 existingEmployee.managerID = model.managerID;
 
-              
+
 
                 // Update the employee data in Firebase with the modified data
                 await _firebaseClient
@@ -140,7 +142,7 @@ namespace AntonieMotors_XBCAD7319.Controllers
             return RedirectToAction("EmployeeManagement");
         }
 
-     
+
 
         private async Task<EmployeeModel> GetEmployeeByIdAsync(string businessId, string employeeId)
         {
@@ -176,7 +178,7 @@ namespace AntonieMotors_XBCAD7319.Controllers
         {
             return View();
         }
-        
+
         //fetches analytics data for services
         private async Task getServicesAnalytics()
         {
@@ -211,7 +213,138 @@ namespace AntonieMotors_XBCAD7319.Controllers
             {
                 ViewBag.ErrorMessage = $"Error: {e.Message}";
             }
-            
+
+        }
+
+        private async Task fetchQuoteRequests()
+        {
+            try
+            {
+                var quoteRequestsResponse = await _firebaseClient
+                    .Child($"Users/{BusinessID.businessId}/Customers")
+                    .OnceAsync<dynamic>();
+
+                var quoteRequestsList = new List<dynamic>();
+
+                foreach (var customer in quoteRequestsResponse)
+                {
+                    var customerQuotes = customer.Object.QuoteRequests;
+
+                    if (customerQuotes != null)
+                    {
+                        foreach (var quoteRequest in customerQuotes)
+                        {
+                            quoteRequestsList.Add(new
+                            {
+                                CustomerName = customer.Object.CustomerName,
+                                CarMake = quoteRequest.Value.CarMake,
+                                CarModel = quoteRequest.Value.CarModel,
+                                Description = quoteRequest.Value.Description,
+                                PhoneNumber = quoteRequest.Value.PhoneNumber,
+                                CustomerId = customer.Key // Customer ID is the key here
+                            });
+                        }
+                    }
+                }
+
+                ViewBag.quoteRequests = quoteRequestsList;
+            }
+            catch (Exception e)
+            {
+                ViewBag.ErrorMessage = $"Error: {e.Message}";
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> MarkAsDone(string customerId)
+        {
+            try
+            {
+                // Define the path to the customer's quote requests
+                var path = $"Users/{BusinessID.businessId}/Customers/{customerId}/QuoteRequests";
+
+                // Delete the customer's quote request
+                await _firebaseClient.Child(path).DeleteAsync();
+
+                // Refresh the list of quote requests after deletion
+                await fetchQuoteRequests();
+
+                TempData["SuccessMessage"] = "Quote request marked as done.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"An error occurred while marking as done: {ex.Message}";
+            }
+
+            return RedirectToAction("QuoteGenerator");
+        }
+
+        private async Task fetchInventory()
+        {
+            try
+            {
+                var inventoryResponse = await _firebaseClient.Child($"Users/{BusinessID.businessId}/parts").OnceAsync<dynamic>();
+
+                var inventoryList = new List<dynamic>();
+
+                foreach (var part in inventoryResponse)
+                {
+                    inventoryList.Add(new
+                    {
+                        partName = part.Object.partName,
+                        costPrice = part.Object.costPrice,
+                        stockCount = part.Object.stockCount
+                    });
+                }
+
+                ViewBag.inventory = inventoryList;
+            }
+            catch (Exception e)
+            {
+                ViewBag.ErrorMessage = $"Error: {e.Message}";
+            }
+        }
+
+        public IActionResult Logout()
+        {
+            // Log out the user
+            Response.Cookies.Delete(".AspNetCore.Identity.Application");
+
+            // Redirect to a confirmation page or homepage
+            return RedirectToAction("Index", "Home");
+        }
+
+        public async Task<IActionResult> SendPasswordResetEmail()
+        {
+            await _authProvider.SendPasswordResetEmailAsync(BusinessID.email);
+            Console.WriteLine("Email sent successfully");
+            return RedirectToAction("Account", "Admin");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteAccount()
+        {
+            try
+            {
+                string userId = BusinessID.userId;
+                string businessId = BusinessID.businessId;
+
+                // Delete customer data from Firebase
+                await _firebaseClient.Child($"Users/{businessId}/Employees/{userId}").DeleteAsync();
+
+                return Logout();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting account: {ex.Message}");
+                TempData["ErrorMessage"] = "Unable to delete account. Please try again.";
+                return RedirectToAction("Account", "Admin");
+            }
+        }
+
+        public IActionResult Account()
+        {
+            return View();
         }
     }
 }
