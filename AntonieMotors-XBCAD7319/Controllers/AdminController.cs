@@ -4,6 +4,9 @@ using Firebase.Database;
 using Firebase.Database.Query;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+using System.Globalization;
 using System.Net;
 
 namespace AntonieMotors_XBCAD7319.Controllers
@@ -169,11 +172,7 @@ namespace AntonieMotors_XBCAD7319.Controllers
             }
         }
 
-        public IActionResult LeaveManagement()
-        {
-            return View();
-        }
-
+     
 
         public async Task<IActionResult> InventoryManagement()
         {
@@ -661,5 +660,215 @@ namespace AntonieMotors_XBCAD7319.Controllers
         }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        #region Leave Management with Date Filtering
+
+        [HttpGet]
+        public async Task<IActionResult> LeaveManagement()
+        {
+            // Initialize the model with all approved leaves
+            var model = new LeaveModel
+            {
+                Leaves = await GetAllApprovedLeavesAsync(businessId)
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> FilterLeaves(string startDate, string endDate)
+        {
+            var model = new LeaveModel
+            {
+                StartDate = startDate,
+                EndDate = endDate
+            };
+
+            Console.WriteLine($"Filtering leaves from {startDate} to {endDate}");
+
+            // Try parsing the start and end dates
+            if (TryParseDate(startDate, out var parsedStartDate) && TryParseDate(endDate, out var parsedEndDate))
+            {
+                // Filter leaves based on the date range
+                model.Leaves = await GetLeavesWithinRangeAsync(businessId, parsedStartDate, parsedEndDate);
+
+                // If leaves are found, log it, otherwise show message
+                if (model.Leaves.Any())
+                {
+                    Console.WriteLine($"{model.Leaves.Count} leaves found in the selected range.");
+                }
+                else
+                {
+                    Console.WriteLine("No leaves found in the selected date range.");
+                    TempData["InfoMessage"] = "No leave requests found within the selected date range.";
+                }
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Invalid date format. Please provide valid start and end dates.";
+            }
+
+            return View("LeaveManagement", model);
+        }
+
+        // Fetch all approved leaves
+        private async Task<List<LeaveDetail>> GetAllApprovedLeavesAsync(string businessId)
+        {
+            var employeeLeaves = new List<LeaveDetail>();
+
+            try
+            {
+                var employees = await _firebaseClient
+                    .Child($"Users/{businessId}/Employees")
+                    .OnceAsync<Dictionary<string, object>>();
+
+                Console.WriteLine($"Retrieved {employees.Count} employees from Firebase.");
+
+                foreach (var employee in employees)
+                {
+                    Console.WriteLine($"Processing employee: {employee.Key}");
+                    Console.WriteLine($"Employee Data: {JsonConvert.SerializeObject(employee.Object)}");
+
+                    // Attempt to retrieve ApprovedLeave
+                    if (employee.Object.TryGetValue("ApprovedLeave", out var approvedLeaveObj))
+                    {
+                        Console.WriteLine($"Found ApprovedLeave for employee {employee.Key}");
+
+                        if (approvedLeaveObj is JObject approvedLeaveJObject)
+                        {
+                            // Deserialize JObject into a Dictionary
+                            var approvedLeaves = approvedLeaveJObject.ToObject<Dictionary<string, object>>();
+                            foreach (var leave in approvedLeaves.Values)
+                            {
+                                if (leave is JObject leaveDataJObject)
+                                {
+                                    var leaveData = leaveDataJObject.ToObject<Dictionary<string, string>>();
+                                    if (leaveData != null &&
+                                        leaveData.TryGetValue("startDate", out var startDate) &&
+                                        leaveData.TryGetValue("endDate", out var endDate) &&
+                                        leaveData.TryGetValue("userName", out var userName))
+                                    {
+                                        if (TryParseDate(endDate, out var parsedEndDate) && parsedEndDate >= DateTime.Now)
+                                        {
+                                            employeeLeaves.Add(new LeaveDetail
+                                            {
+                                                EmployeeName = userName,
+                                                StartDate = startDate,
+                                                EndDate = endDate
+                                            });
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine($"ApprovedLeave data could not be parsed for employee {employee.Key}: {approvedLeaveObj.GetType()}");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Employee {employee.Key} has no ApprovedLeave data.");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error retrieving approved leaves: {ex.Message}");
+            }
+
+            return employeeLeaves;
+        }
+
+
+        // Parse date with multiple formats
+        private bool TryParseDate(string date, out DateTime parsedDate)
+        {
+            var formats = new[] { "dd/MM/yyyy", "MM/dd/yyyy", "yyyy-MM-dd" }; // Add more formats if necessary
+            return DateTime.TryParseExact(date, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsedDate);
+        }
+
+        // Fetch leaves within the specified date range
+        private async Task<List<LeaveDetail>> GetLeavesWithinRangeAsync(string businessId, DateTime startDate, DateTime endDate)
+        {
+            Console.WriteLine($"Fetching leaves within range: {startDate:dd/MM/yyyy} to {endDate:dd/MM/yyyy}");
+
+            // Retrieve all leaves
+            var allLeaves = await GetAllApprovedLeavesAsync(businessId);
+
+            if (!allLeaves.Any())
+            {
+                Console.WriteLine("No leaves were retrieved.");
+                return new List<LeaveDetail>();
+            }
+
+            Console.WriteLine($"{allLeaves.Count} total leaves retrieved.");
+
+            // Filter leaves based on the date range
+            var filteredLeaves = allLeaves.Where(leave =>
+                TryParseDate(leave.StartDate, out var leaveStartDate) &&
+                TryParseDate(leave.EndDate, out var leaveEndDate) &&
+                leaveStartDate <= endDate && leaveEndDate >= startDate) // Leave must overlap with the range
+                .ToList();
+
+            Console.WriteLine($"{filteredLeaves.Count} leaves found after filtering.");
+
+            return filteredLeaves;
+        }
+
+        #endregion
     }
+
+
 }
