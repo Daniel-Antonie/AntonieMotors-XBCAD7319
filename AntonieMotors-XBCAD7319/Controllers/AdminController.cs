@@ -170,7 +170,10 @@ namespace AntonieMotors_XBCAD7319.Controllers
             }
         }
 
-
+        public IActionResult LeaveManagement()
+        {
+            return View();
+        }
 
 
         public IActionResult InventoryManagement()
