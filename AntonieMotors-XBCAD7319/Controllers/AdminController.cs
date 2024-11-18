@@ -75,7 +75,7 @@ namespace AntonieMotors_XBCAD7319.Controllers
 
                 // Filter customers by managerId if applicable
                 var filteredCustomers = customers
-                  
+
                     .Select(c => new CustomerModel
                     {
                         CustomerName = c.Object.CustomerName,
@@ -87,7 +87,7 @@ namespace AntonieMotors_XBCAD7319.Controllers
                     })
                     .ToList();
 
-               // Console.WriteLine($"Filtered {filteredCustomers.Count} customers for ManagerID: {managerId}");
+                // Console.WriteLine($"Filtered {filteredCustomers.Count} customers for ManagerID: {managerId}");
                 return filteredCustomers;
             }
             catch (Exception ex)
@@ -174,7 +174,7 @@ namespace AntonieMotors_XBCAD7319.Controllers
 
 
 
-        public IActionResult InventoryManagement()
+        public async Task<IActionResult> InventoryManagement()
         {
             await fetchInventory();
             return View();
@@ -243,7 +243,7 @@ namespace AntonieMotors_XBCAD7319.Controllers
 
 
 
-    [HttpPost]
+        [HttpPost]
         public async Task<IActionResult> EditEmployee(EmployeeModel model, IFormFile ProfileImage)
         {
             string businessId = BusinessID.businessId;
@@ -329,7 +329,7 @@ namespace AntonieMotors_XBCAD7319.Controllers
                 //total service count
                 int serviceCount = services.Count();
 
-                ViewBag.ServiceCount = serviceCount;    
+                ViewBag.ServiceCount = serviceCount;
 
                 // Count services with status set to "Completed"
                 int completedServicesCount = services.Count(service =>
@@ -530,68 +530,63 @@ namespace AntonieMotors_XBCAD7319.Controllers
                 ViewBag.ErrorMessage = $"Error: {e.Message}";
             }
 
+            return fullName;
         }
 
         private async Task fetchQuoteRequests()
         {
             try
             {
+                // Retrieve all quote requests stored under the business ID
                 var quoteRequestsResponse = await _firebaseClient
-                    .Child($"Users/{BusinessID.businessId}/Customers")
-                    .OnceAsync<dynamic>();
+                    .Child($"Users/{BusinessID.businessId}/QuoteRequests")
+                    .OnceAsync<QuoteRequestModel>();
 
                 var quoteRequestsList = new List<dynamic>();
 
-                foreach (var customer in quoteRequestsResponse)
+                // Iterate over the results and prepare the data for display
+                foreach (var quoteRequest in quoteRequestsResponse)
                 {
-                    var customerQuotes = customer.Object.QuoteRequests;
-
-                    if (customerQuotes != null)
+                    quoteRequestsList.Add(new
                     {
-                        foreach (var quoteRequest in customerQuotes)
-                        {
-                            quoteRequestsList.Add(new
-                            {
-                                CustomerName = customer.Object.CustomerName,
-                                CarMake = quoteRequest.Value.CarMake,
-                                CarModel = quoteRequest.Value.CarModel,
-                                Description = quoteRequest.Value.Description,
-                                PhoneNumber = quoteRequest.Value.PhoneNumber,
-                                CustomerId = customer.Key // Customer ID is the key here
-                            });
-                        }
-                    }
+                        CustomerName = quoteRequest.Object.CustomerName,
+                        CarMake = quoteRequest.Object.CarMake,
+                        CarModel = quoteRequest.Object.CarModel,
+                        Description = quoteRequest.Object.Description,
+                        PhoneNumber = quoteRequest.Object.PhoneNumber,
+                        RequestId = quoteRequest.Key // Firebase unique key
+                    });
                 }
 
+                // Pass the data to the view
                 ViewBag.quoteRequests = quoteRequestsList;
             }
             catch (Exception e)
             {
+                // Handle and log errors
                 ViewBag.ErrorMessage = $"Error: {e.Message}";
             }
         }
 
         [HttpPost]
-        public async Task<IActionResult> MarkAsDone(string customerId)
+        public async Task<IActionResult> DeleteQuoteRequest(string requestId)
         {
             try
             {
-                // Define the path to the customer's quote requests
-                var path = $"Users/{BusinessID.businessId}/Customers/{customerId}/QuoteRequests";
-
-                // Delete the customer's quote request
-                await _firebaseClient.Child(path).DeleteAsync();
-
-                // Refresh the list of quote requests after deletion
-                await fetchQuoteRequests();
+                // Delete the quote request from Firebase
+                await _firebaseClient
+                    .Child($"Users/{BusinessID.businessId}/QuoteRequests/{requestId}")
+                    .DeleteAsync();
 
                 TempData["SuccessMessage"] = "Quote request marked as done.";
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                TempData["ErrorMessage"] = $"An error occurred while marking as done: {ex.Message}";
+                TempData["ErrorMessage"] = $"Error: {e.Message}";
             }
 
+            // Refresh the list of quote requests
+            await fetchQuoteRequests();
             return RedirectToAction("QuoteGenerator");
         }
 

@@ -384,7 +384,7 @@ namespace AntonieMotors_XBCAD7319.Controllers
     }
 }
 
-        public class QuoteRequestModel
+public class QuoteRequestModel
 {
     public string CustomerId { get; set; }
     public string CustomerName { get; set; }
