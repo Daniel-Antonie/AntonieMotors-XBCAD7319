@@ -1,13 +1,67 @@
-﻿@{
+﻿@model List<CustomerModel>
+
+@{
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
 <div class="container-fluid" style="margin-left: 250px;">
-<h1>Customer Management</h1>
-<p>Search and view details of all registered customers.</p>
-<form class="form-inline">
-    <input type="text" class="form-control mr-sm-2" placeholder="Search Customers" aria-label="Search" />
-    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-</form>
+    <h2>Customers</h2>
+    <p>View all customers registered to the business.</p>
 
+    <!-- Search Form -->
+    <form method="get" action="/Admin/CustomerManagement">
+        <div class="form-group row">
+            <div class="col-md-8">
+                <input type="text" name="searchQuery" class="form-control" placeholder="Search by name, email, or phone..." />
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+            <div class="col-md-2">
+                <a href="/Admin/CustomerManagement" class="btn btn-secondary">Display All</a>
+            </div>
+        </div>
+    </form>
+
+   
+    <div class="card">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Physical Address</th>
+                    <th>Type</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="5" class="text-center">No employees found.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var customer in Model)
+                    {
+                        <tr>
+                            <td>@customer.CustomerName</td>
+                            <td>@customer.CustomerSurname</td>
+                            <td>@customer.CustomerEmail</td>
+                            <td>@customer.CustomerMobileNum</td>
+                            <td>@customer.CustomerAddress</td>
+                            <td>@customer.CustomerType</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+    @*
+    <footer>
+    <p>&copy; 2024 - Antonie Motors - Privacy Policy</p>
+    </footer> *@
 </div>

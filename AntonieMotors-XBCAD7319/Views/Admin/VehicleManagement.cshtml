@@ -1,39 +1,75 @@
-﻿@{
-  //  ViewBag.Title = "Vehicle Management";
+﻿@model List<VehicleModel>
+
+@{
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
 <div class="container-fluid" style="margin-left: 250px;">
- 
-    <h2>Vehicle Management</h2>
-    <p>View and manage all vehicles registered to the business.</p>
+    <h2>Vehicles</h2>
+    <p>View all vehicles registered to the business.</p>
 
-    <!-- Vehicle Table -->
+    <!-- Search Form -->
+    <form method="get" action="/Admin/VehicleManagement">
+        <div class="form-group row">
+            <div class="col-md-8">
+                <input type="text" name="searchQuery" class="form-control" placeholder="Search by number plate, owner name, make or model..." />
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+            <div class="col-md-2">
+                <a href="/Admin/VehicleManagement" class="btn btn-secondary">Display All</a>
+            </div>
+        </div>
+    </form>
+
     <div class="card">
         <table class="table table-bordered">
             <thead>
                 <tr>
-                    <th>Vehicle ID</th>
-                    <th>Owner</th>
-                    <th>Model</th>
                     <th>License Plate</th>
-                    <th>Actions</th>
+                    <th>Make</th>
+                    <th>Model</th>
+                    <th>Year</th>
+                    <th>Kms Travelled</th>
+                    <th>Vin Number</th>
+                    <th>Vehicle Owner</th>
+                    <th>Image</th>
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>V123</td>
-                    <td>John Doe</td>
-                    <td>Ford Mustang</td>
-                    <td>ABC123</td>
-                    <td><button class="btn btn-primary view-button">View</button></td>
-                </tr>
-             
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="7" class="text-center">No vehicles found.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var vehicle in Model)
+                    {
+                        <tr>
+                            <td>@vehicle.vehicleNumPlate</td>
+                            <td>@vehicle.vehicleMake</td>
+                            <td>@vehicle.vehicleModel</td>
+                            <td>@vehicle.vehicleYear</td>
+                            <td>@vehicle.vehicleKms</td>
+                            <td>@vehicle.vinNumber</td>
+                            <td>@vehicle.vehicleOwner</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(vehicle.frontImageURL))
+                                {
+                                    <img src="@vehicle.frontImageURL" alt="Front Image" style="width: 100px; height: auto;" />
+                                }
+                                else
+                                {
+                                    <span>No Image</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
             </tbody>
         </table>
     </div>
-
-    <footer>
-        <p>&copy; 2024 - Antonie Motors - Privacy Policy</p>
-    </footer>
 </div>

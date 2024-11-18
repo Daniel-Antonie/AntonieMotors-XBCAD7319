@@ -2,29 +2,77 @@
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
+<link rel="stylesheet" href="~/css/servicepagestyle.css" />
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<div class="container-fluid" style="margin-left: 250px;">
-<h1>Analytics</h1>
-<p>View analytics and metrics for the business performance.</p>
+<div class="service-cards-container" >
+    <!-- Analytics Header -->
+    <div class="card shadow-sm mb-4" style="background-color: #9dc183; width:100%; border-radius: 10px;">
+        <div class="card-body text-center">
+            <h1 class="display-4 text-white">Analytics</h1>
+            <p class="lead text-white">View analytics and metrics for your business performance.</p>
+        </div>
+    </div>
 
-@*     <div>
-        
-        <canvas id="myPieChart" width="400" height="400"></canvas>
-    </div> *@
+    <br/>
+    <!-- Services Analytics Content -->
+    <div class="card shadow-sm p-4 mb-4" style=" width:100%;">
+        <div class="card-body text-center">
+            <h2 class="text-success"><strong>Your Services</strong></h2>
+            <h3>Total Services: <strong>@ViewBag.ServiceCount</strong></h3>
+        </div>
+    </div>
 
-   
-    <!-- Script for the Pie Chart -->
-    <div >
-        <h2>Your Services</h2>
-        <br />
-        <div class="col-md-6">
-            <canvas id="completedServicesChart"></canvas>
+    <br />
+    <!-- Service Statuses Chart -->
+    <div class="row justify-content-center mb-4">
+        <div class="col-lg-6 col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4 class="text-success text-center">Service Statuses Statistics</h4>
+                    <canvas id="completedServicesChart" class="mt-3"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4 class="text-success text-center">Service Payment Statistics</h4>
+                    <canvas id="paidServicesChart" class="mt-3"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <br/>
+    <br/>
+
+    @* Employee Analytics *@
+    <div class="card shadow-sm p-4 mb-4" style=" width:100%;">
+        <div class="card-body text-center">
+            <h2 class="text-success"><strong>Your Employees</strong></h2>
+            <h3>Total Employees: <strong>@ViewBag.EmployeeCount</strong></h3>
+        </div>
+    </div>
+
+    <br/>
+
+    <!-- Employee Statuses Chart -->
+    <div class="row justify-content-center mb-4" style="width: 100%">
+        <div class="col-auto col-auto" >
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4 class="text-success text-center">Employee Types</h4>
+                    <canvas id="employeesChart" class="mt-3"></canvas>
+                </div>
+            </div>
         </div>
     </div>
 
 
 </div>
+
 
 
 <script>
@@ -40,6 +88,62 @@
                         '#83D19E',
                         '#F3BD6C',
                         '#D05353'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                }
+            }
+        });
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const paidCtx = document.getElementById('paidServicesChart').getContext('2d');
+        const myPieChart = new Chart(paidCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Paid', 'Unpaid'],
+                datasets: [{
+                    data: [@ViewBag.NumServicesPaid, @ViewBag.NumServicesUnpaid],
+                    backgroundColor: [
+                        '#83D19E',
+                        '#D05353'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                }
+            }
+        });
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const empCtx = document.getElementById('employeesChart').getContext('2d');
+        const myPieChart = new Chart(empCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Employee', 'Business Owner', 'Manager'],
+                datasets: [{
+                    data: [@ViewBag.NumEmployeeEmployee, @ViewBag.NumOwnerEmployee, @ViewBag.NumAdminEmployee],
+                    backgroundColor: [
+                     '#917C78',
+                     '#83D19E',
+                     '#495F41',
+                        
                     ],
                     borderWidth: 1
                 }]

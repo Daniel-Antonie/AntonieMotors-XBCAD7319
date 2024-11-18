@@ -47,7 +47,7 @@
 
         .login-box {
             background-color: rgba(255, 255, 255, 0.2); /* Light white with transparency */
-            padding: 20px;
+            padding: 30px; /* Increased padding for more space inside the box */
             border-radius: 15px; /* Rounded corners */
             box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.2); /* Soft shadow */
             text-align: center;
@@ -57,9 +57,16 @@
         }
 
             .login-box h2 {
-                margin-bottom: 20px;
+                margin-bottom: 30px; /* Increased bottom margin for more space */
                 color: white; /* Login text in white */
-                font-size: 24px;
+                font-size: 18px;
+                font-weight: bold;
+            }
+
+            .login-box h1 {
+                margin-bottom: 40px; /* Increased bottom margin for more space */
+                color: white; /* Login text in white */
+                font-size: 30px;
                 font-weight: bold;
             }
 
@@ -68,14 +75,14 @@
                 display: block;
                 color: #fff; /* Label in white */
                 font-size: 14px;
-                margin-bottom: 5px;
+                margin-bottom: 8px; /* Increased margin for spacing */
             }
 
             .login-box input[type="email"],
             .login-box input[type="password"] {
                 width: 90%;
-                padding: 12px;
-                margin: 10px 0;
+                padding: 14px; /* Increased padding for larger inputs */
+                margin: 12px 0; /* Increased margin for more space between inputs */
                 border-radius: 25px; /* Rounded inputs */
                 border: 1px solid #ccc;
                 box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.1);
@@ -90,7 +97,7 @@
 
             .login-box .btn-login {
                 width: 100%;
-                padding: 12px;
+                padding: 14px; /* Increased padding for larger button */
                 background-color: #28a745; /* Green button */
                 color: white;
                 border: none;
@@ -100,7 +107,9 @@
                 font-weight: bold;
                 font-style: italic; /* Italics for 'Sign in' text */
                 transition: background-color 0.3s;
+                margin-top: 15px; /* Added top margin for spacing */
             }
+
 
                 .login-box .btn-login:hover {
                     background-color: #218838; /* Darker green on hover */
@@ -108,7 +117,7 @@
 
             .login-box .forgot-password {
                 display: block;
-                margin-top: 10px;
+                margin-top: 15px; /* Increased top margin for spacing */
                 font-size: 14px;
                 color: #007bff;
                 text-decoration: none;
@@ -184,7 +193,7 @@
 <body>
     <div class="login-container">
         <div class="login-box">
-            <h2>Login</h2>
+            <h1>Login</h1>
 
             <!-- Display error message if there is any -->
             @if (TempData["Error"] != null)
@@ -202,17 +211,19 @@
                 <label for="password">Password</label>
                 <input type="password" id="password" name="password" placeholder="Password" required>
 
-                <a href="#" class="forgot-password">Forgot Password?</a>
+              @*   <a href="#" class="forgot-password">Forgot Password?</a> *@
                 <button type="submit" class="btn-login">Sign in</button>
             </form>
 
-            <div class="or-container">or continue with</div>
+          @*   <div class="or-container">or continue with</div>
 
             <div class="social-login">
                 <button class="google-login">
                     <img src="/Images/googlelogo.png" alt="Google Logo"> Sign in with Google
-                </button>
-            </div>
+                </button> *@
+           @*  </div> *@
+
+           <h2> Performance is our passion.</h2>
         </div>
     </div>
 

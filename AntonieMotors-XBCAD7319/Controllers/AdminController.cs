@@ -4,6 +4,7 @@ using Firebase.Database;
 using Firebase.Database.Query;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using System.Net;
 
 namespace AntonieMotors_XBCAD7319.Controllers
 {
@@ -37,22 +38,149 @@ namespace AntonieMotors_XBCAD7319.Controllers
             return View();
         }
 
-        public IActionResult CustomerManagement()
+        public async Task<IActionResult> CustomerManagement(string searchQuery = "")
         {
-            return View();
+            string businessId = BusinessID.businessId; // Replace with the logged-in user's business ID
+            string managerId = BusinessID.userId; // Replace with the logged-in user's manager ID
+
+            Console.WriteLine($"BusinessID: {businessId}, ManagerID: {managerId}");
+
+            // Fetch customers asynchronously
+            var customers = await GetCustomersAsync(businessId, managerId);
+
+            // Filter customers based on the search query (case-insensitive)
+            if (!string.IsNullOrEmpty(searchQuery))
+            {
+                customers = customers.Where(c =>
+                    c.CustomerName.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                    c.CustomerSurname.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                    c.CustomerEmail.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                    c.CustomerMobileNum.Contains(searchQuery, StringComparison.OrdinalIgnoreCase)
+                ).ToList();
+            }
+
+            return View(customers);
         }
 
-        public IActionResult VehicleManagement()
+        private async Task<List<CustomerModel>> GetCustomersAsync(string businessId, string managerId)
         {
-            return View();
+            try
+            {
+                // Fetch customers under the businessId
+                var customers = await _firebaseClient
+                    .Child($"Users/{businessId}/Customers")
+                    .OnceAsync<CustomerModel>();
+
+                Console.WriteLine($"Fetched {customers.Count} customers from Firebase.");
+
+                // Filter customers by managerId if applicable
+                var filteredCustomers = customers
+                  
+                    .Select(c => new CustomerModel
+                    {
+                        CustomerName = c.Object.CustomerName,
+                        CustomerSurname = c.Object.CustomerSurname,
+                        CustomerEmail = c.Object.CustomerEmail,
+                        CustomerMobileNum = c.Object.CustomerMobileNum,
+                        CustomerAddress = c.Object.CustomerAddress,
+                        CustomerType = c.Object.CustomerType
+                    })
+                    .ToList();
+
+               // Console.WriteLine($"Filtered {filteredCustomers.Count} customers for ManagerID: {managerId}");
+                return filteredCustomers;
+            }
+            catch (Exception ex)
+            {
+                // Log the error (use ILogger for production scenarios)
+                Console.WriteLine($"Error fetching customers: {ex.Message}");
+                return new List<CustomerModel>();
+            }
         }
-        public async Task<IActionResult> InventoryManagement()
+
+
+
+
+        public async Task<IActionResult> VehicleManagement(string searchQuery = "")
+        {
+            string businessId = BusinessID.businessId; // Replace with the logged-in user's business ID
+            string managerId = BusinessID.userId; // Replace with the logged-in user's manager ID
+
+            Console.WriteLine($"BusinessID: {businessId}, ManagerID: {managerId}");
+
+            // Fetch vehicles asynchronously
+            var vehicles = await GetVehiclesAsync(businessId, managerId);
+
+            // Filter vehicles based on the search query (case-insensitive)
+            if (!string.IsNullOrEmpty(searchQuery))
+            {
+                vehicles = vehicles.Where(v =>
+                    v.vehicleNumPlate.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                    v.vehicleOwner.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                    v.vehicleMake.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                    v.vehicleModel.Contains(searchQuery, StringComparison.OrdinalIgnoreCase)
+                ).ToList();
+            }
+
+            return View(vehicles);
+        }
+
+        private async Task<List<VehicleModel>> GetVehiclesAsync(string businessId, string managerId)
+        {
+            try
+            {
+                // Fetch vehicle details under the businessId
+                var vehicles = await _firebaseClient
+                    .Child($"Users/{businessId}/Vehicles")
+                    .OnceAsync<VehicleModel>();
+
+                Console.WriteLine($"Fetched {vehicles.Count} vehicles from Firebase.");
+
+                var vehicleList = new List<VehicleModel>();
+
+                foreach (var v in vehicles)
+                {
+                    // Fetch the front image URL for each vehicle
+                    var frontImageUrls = await _firebaseClient
+                        .Child($"Users/{businessId}/Vehicles/{v.Key}/images/front")
+                        .OnceAsync<string>();
+
+                    // Take the first URL or set to null if none exist
+                    var frontImageURL = frontImageUrls.FirstOrDefault()?.Object;
+
+                    vehicleList.Add(new VehicleModel
+                    {
+                        vehicleNumPlate = v.Object.vehicleNumPlate,
+                        vehicleMake = v.Object.vehicleMake,
+                        vehicleModel = v.Object.vehicleModel,
+                        vehicleYear = v.Object.vehicleYear,
+                        vehicleKms = v.Object.vehicleKms,
+                        vinNumber = v.Object.vinNumber,
+                        vehicleOwner = v.Object.vehicleOwner,
+                        frontImageURL = frontImageURL
+                    });
+                }
+
+                return vehicleList;
+            }
+            catch (Exception ex)
+            {
+                // Log the error (use ILogger for production scenarios)
+                Console.WriteLine($"Error fetching vehicles: {ex.Message}");
+                return new List<VehicleModel>();
+            }
+        }
+
+
+
+
+        public IActionResult InventoryManagement()
         {
             await fetchInventory();
             return View();
         }
 
-        public async Task<IActionResult> EmployeeManagement()
+        public async Task<IActionResult> EmployeeManagement(string searchQuery = "")
         {
             string businessId = BusinessID.businessId; // Replace with the logged-in user's business ID
             string managerId = BusinessID.userId; // Replace with logged-in user's manager ID
@@ -61,9 +189,20 @@ namespace AntonieMotors_XBCAD7319.Controllers
 
             var employees = await GetEmployeesAsync(businessId, managerId);
 
+            if (!string.IsNullOrEmpty(searchQuery))
+            {
+                // Filter employees based on the search query (case-insensitive)
+                employees = employees.Where(e =>
+                    e.firstName.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                    e.lastName.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                    e.email.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                    e.phone.Contains(searchQuery, StringComparison.OrdinalIgnoreCase)
+                ).ToList();
+            }
+
+
             return View(employees);
         }
-
 
         private async Task<List<EmployeeModel>> GetEmployeesAsync(string businessId, string managerId)
         {
@@ -86,7 +225,8 @@ namespace AntonieMotors_XBCAD7319.Controllers
                         lastName = e.Object.lastName,
                         email = e.Object.email,
                         phone = e.Object.phone,
-                        managerID = e.Object.managerID
+                        managerID = e.Object.managerID,
+                        address = e.Object.address
                     })
                     .ToList();
 
@@ -103,7 +243,7 @@ namespace AntonieMotors_XBCAD7319.Controllers
 
 
 
-        [HttpPost]
+    [HttpPost]
         public async Task<IActionResult> EditEmployee(EmployeeModel model, IFormFile ProfileImage)
         {
             string businessId = BusinessID.businessId;
@@ -142,8 +282,6 @@ namespace AntonieMotors_XBCAD7319.Controllers
             return RedirectToAction("EmployeeManagement");
         }
 
-
-
         private async Task<EmployeeModel> GetEmployeeByIdAsync(string businessId, string employeeId)
         {
             try
@@ -161,21 +299,19 @@ namespace AntonieMotors_XBCAD7319.Controllers
             }
         }
 
-
-
         public async Task<IActionResult> AnalyticsAsync()
         {
-            //fetch analytics data to display
-            ViewBag.NumServicesCompleted = null;
-            ViewBag.NumServicesPending = null; //im including both "not started" and "busy" services here
-
             await getServicesAnalytics();
+
+            await getEmployeeAnalytics();
 
             return View();
         }
 
-        public IActionResult Services()
+        public async Task<IActionResult> Services()
         {
+            await getAllServices();
+
             return View();
         }
 
@@ -189,6 +325,11 @@ namespace AntonieMotors_XBCAD7319.Controllers
                 var services = await _firebaseClient
                     .Child($"Users/{businessId}/Services")
                     .OnceAsync<dynamic>();
+
+                //total service count
+                int serviceCount = services.Count();
+
+                ViewBag.ServiceCount = serviceCount;    
 
                 // Count services with status set to "Completed"
                 int completedServicesCount = services.Count(service =>
@@ -208,6 +349,181 @@ namespace AntonieMotors_XBCAD7319.Controllers
                     service.Object.status != null && service.Object.status.ToString() == "Not Started");
 
                 ViewBag.NumServicesNotStarted = notStartedServicesCount;
+
+                //counting paid services
+                int paidServicesCount = services.Count(service =>
+                    Convert.ToBoolean(service.Object.paid.ToString()));
+
+                ViewBag.NumServicesPaid = paidServicesCount;
+
+                //counting unpaid services
+                int unpaidServicesCount = services.Count(service =>
+                    !Convert.ToBoolean(service.Object.paid.ToString()));
+
+                ViewBag.NumServicesUnpaid = unpaidServicesCount;
+
+                Console.WriteLine($"Paid: {paidServicesCount}, Unpaid: {unpaidServicesCount}");
+
+
+
+            }
+            catch (Exception e)
+            {
+                ViewBag.ErrorMessage = $"Error: {e.Message}";
+            }
+
+        }
+
+        private async Task getEmployeeAnalytics()
+        {
+            try
+            {
+                var employees = await _firebaseClient
+                    .Child($"Users/{businessId}/Employees")
+                    .OnceAsync<dynamic>();
+
+                //total service count
+                int empCount = employees.Count();
+
+                ViewBag.EmployeeCount = empCount;
+
+                //counting different emplloyee types
+                int empEmpCount = employees.Count(employee =>
+                    employee.Object.role != null && employee.Object.role.ToString() == "employee");
+
+                ViewBag.NumEmployeeEmployee = empEmpCount;
+
+
+                int adminEmpCount = employees.Count(employee =>
+                    employee.Object.role != null && employee.Object.role.ToString() == "admin");
+
+                ViewBag.NumAdminEmployee = adminEmpCount;
+
+
+                int ownerEmpCount = employees.Count(employee =>
+                    employee.Object.role != null && employee.Object.role.ToString() == "owner");
+
+                ViewBag.NumOwnerEmployee = ownerEmpCount;
+
+                Console.WriteLine($"emps: {empEmpCount}, owners: {ownerEmpCount}, admins: {adminEmpCount}");
+            }
+            catch (Exception e)
+            {
+                ViewBag.ErrorMessage = $"Error: {e.Message}";
+            }
+        }
+
+        private async Task getAllServices()
+        {
+            try
+            {
+                var services = await _firebaseClient.Child($"Users/{BusinessID.businessId}/Services").OnceAsync<dynamic>();
+
+                if (services == null || !services.Any())
+                {
+                    ViewBag.Services = new List<dynamic>();
+                    return;
+                }
+
+                var serviceList = new List<dynamic>();
+
+                foreach (var service in services)
+                {
+
+                    // Fetching vehicle data
+                    string vehicleModel = await fetchVehicleModel((string)service.Object.vehicleID);
+                    string vehicleNumberPlate = await fetchVehicleNumPlate((string)service.Object.vehicleID);
+                    string custName = await fetchCustName((string)service.Object.custID);
+
+                    // Initialize date variables with "N/A"
+                    string dateTakenIn = "N/A";
+                    string dateReturned = "N/A";
+
+                    // Handle dateTakenIn if it's not null and has a time field (Unix timestamp)
+                    if (service.Object.dateReceived != null && service.Object.dateReceived.time != null)
+                    {
+                        long dateTakenInLong = (long)service.Object.dateReceived.time; // Get Unix timestamp
+                        DateTime dateTakenInDateTime = DateTimeOffset.FromUnixTimeMilliseconds(dateTakenInLong).DateTime; // Convert to DateTime
+                        dateTakenIn = dateTakenInDateTime.ToString("dd MMMM yyyy");
+                    }
+
+                    // Handle dateReturned if it's not null and has a time field (Unix timestamp)
+                    if (service.Object.dateReturned != null && service.Object.dateReturned.time != null)
+                    {
+                        long dateReturnedLong = (long)service.Object.dateReturned.time; // Get Unix timestamp
+                        DateTime dateReturnedDateTime = DateTimeOffset.FromUnixTimeMilliseconds(dateReturnedLong).DateTime; // Convert to DateTime
+                        dateReturned = dateReturnedDateTime.ToString("dd MMMM yyyy");
+                    }
+
+                    // Handling totalCost
+                    string totalCost = $"R {service.Object.totalCost}";
+
+                    // Add the service to the list
+                    serviceList.Add(new
+                    {
+                        Name = (string)service.Object.name, // Cast name to string
+                        Status = (string)service.Object.status, // Cast status to string
+                        Customer = custName,
+                        Model = vehicleModel,
+                        NumberPlate = vehicleNumberPlate,
+                        DateTakenIn = dateTakenIn,
+                        DateReturned = dateReturned,
+                        TotalCost = totalCost
+                    });
+                }
+
+
+                // Set services in ViewBag
+                ViewBag.Services = serviceList;
+                Console.WriteLine($"Services fetched: {serviceList.Count}");
+            }
+            catch (Exception e)
+            {
+                ViewBag.ErrorMessage = $"Error: {e.Message}";
+            }
+        }
+
+        private async Task<string> fetchVehicleNumPlate(dynamic vehicleID)
+        {
+            try
+            {
+                return await _firebaseClient.Child($"Users/{BusinessID.businessId}/Vehicles/{vehicleID}/vehicleNumPlate").OnceSingleAsync<String>();
+            }
+            catch (Exception e)
+            {
+                return "Could not load vehicle data";
+            }
+        }
+
+        private async Task<string> fetchVehicleModel(dynamic vehicleID)
+        {
+            string vehMakeModel = "Could not load vehicle data";
+
+            try
+            {
+                string vehMake = await _firebaseClient.Child($"Users/{BusinessID.businessId}/Vehicles/{vehicleID}/vehicleMake").OnceSingleAsync<String>();
+                string vehModel = await _firebaseClient.Child($"Users/{BusinessID.businessId}/Vehicles/{vehicleID}/vehicleModel").OnceSingleAsync<String>();
+
+                vehMakeModel = vehMake + " " + vehModel;
+            }
+            catch (Exception e)
+            {
+                ViewBag.ErrorMessage = $"Error: {e.Message}";
+            }
+
+            return vehMakeModel;
+        }
+
+        private async Task<string> fetchCustName(dynamic custID)
+        {
+            string fullName = "Could not load customer data";
+
+            try
+            {
+                string firstName = await _firebaseClient.Child($"Users/{BusinessID.businessId}/Customers/{custID}/CustomerName").OnceSingleAsync<String>();
+                string surname = await _firebaseClient.Child($"Users/{BusinessID.businessId}/Customers/{custID}/CustomerSurname").OnceSingleAsync<String>();
+
+                fullName = firstName + " " + surname;
             }
             catch (Exception e)
             {

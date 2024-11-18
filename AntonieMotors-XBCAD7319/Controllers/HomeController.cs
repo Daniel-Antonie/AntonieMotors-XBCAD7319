@@ -28,6 +28,11 @@ namespace AntonieMotors_XBCAD7319.Controllers
             return View();
         }
 
+        public IActionResult CarUpholstery()
+        {
+            return View();
+        }
+
 
 
         public IActionResult Privacy()
