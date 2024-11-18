@@ -2,7 +2,69 @@
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="container-fluid" style="margin-left: 250px;">
-<h1>Welcome to the Admin Dashboard</h1>
-<p>Here, you can access all management features and view analytics for the business.</p>
+<style>
+
+    h1.display-4 {
+        font-weight: bold;
+        margin-top: 100px;
+    }
+
+    p.lead {
+        font-size: 1.2rem;
+        margin-top: 30px;
+        font-weight: normal;
+    }
+
+    /* Centering the content */
+    #main-content {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 80vh; /* Adjust the height */
+        padding-top: 40px;
+    }
+
+</style>
+
+<!-- Main Container for the Admin Page -->
+<div id="wrapper">
+    <!-- Sidebar -->
+    <div id="sidebar-wrapper">
+        <div class="sidebar-logo">
+            <img src="~/Images/admin-logo.jpg" alt="Admin Logo" />
+            <h3>Admin Dashboard</h3>
+        </div>
+        <div class="sidebar-heading">Navigation</div>
+        <div class="list-group list-group-flush">
+            <a href="@Url.Action("Index", "Admin")" class="list-group-item list-group-item-action">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+            <a href="@Url.Action("ManageUsers", "Admin")" class="list-group-item list-group-item-action">
+                <i class="fas fa-users"></i> Manage Users
+            </a>
+            <a href="@Url.Action("ViewAnalytics", "Admin")" class="list-group-item list-group-item-action">
+                <i class="fas fa-chart-line"></i> Analytics
+            </a>
+            <a href="@Url.Action("Settings", "Admin")" class="list-group-item list-group-item-action">
+                <i class="fas fa-cogs"></i> Settings
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="main-content">
+        <div class="container-fluid">
+            <!-- Welcome Section -->
+            <h1 class="display-4 text-center">Welcome to Your Dashboard</h1>
+            <p class="lead text-center mt-4">
+                Make use of the sidebar to navigate through your menu and manage platform features.
+            </p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div id="footer">
+        <p>&copy; 2024 Antonie Motors. All rights reserved.</p>
+    </div>
 </div>

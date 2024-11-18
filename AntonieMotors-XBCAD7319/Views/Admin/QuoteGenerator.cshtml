@@ -2,18 +2,114 @@
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="container-fluid" style="margin-left: 250px;">
-<h1>Quote Generator</h1>
-<form>
-    <div class="form-group">
-        <label for="serviceSelection">Select Service:</label>
-        <select class="form-control" id="serviceSelection">
-            <option>Service 1</option>
-            <option>Service 2</option>
-            <option>Service 3</option>
-        </select>
-    </div>
-    <button type="submit" class="btn btn-primary">Generate Quote</button>
-</form>
+<div class="container-fluid">
+    <h1 style="font-family: Arial, sans-serif; color: #333; margin-bottom: 20px;">Quote Request Management</h1>
+    <p style="font-family: Arial, sans-serif; color: #666; font-size: 16px; margin-bottom: 20px;">
+        Manage all quote requests below. Click "Mark as Done" to process a request.
+    </p>
 
+    @if (ViewBag.quoteRequests != null)
+    {
+        <table class="table custom-table">
+            <thead>
+                <tr>
+                    <th>Customer Name</th>
+                    <th>Make/Model</th>
+                    <th>Description</th>
+                    <th>Phone Number</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var quoteRequest in ViewBag.quoteRequests)
+                {
+                    <tr>
+                        <td>@quoteRequest.CustomerName</td>
+                        <td>@quoteRequest.CarMake @quoteRequest.CarModel</td>
+                        <td>@quoteRequest.Description</td>
+                        <td>@quoteRequest.PhoneNumber</td>
+                        <td>
+                            <form asp-action="DeleteQuoteRequest" method="post">
+                                <input type="hidden" name="requestId" value="@quoteRequest.RequestId" />
+                                <button type="submit" class="btn btn-success">Mark as Done</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p class="no-requests-text">No quote requests found at this time.</p>
+    }
 </div>
+
+
+<style>
+   
+    .container-fluid {
+        background-color: #F5F5DC; 
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+  
+    .custom-table {
+        width: 100%;
+        margin: 0 auto;
+        border-collapse: collapse;
+        background-color: #ffffff;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+        .custom-table th {
+            background-color: #9DC183; 
+            color: white;
+            font-weight: bold;
+            padding: 12px;
+            text-align: center;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .custom-table td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+            font-family: Arial, sans-serif;
+            color: #333;
+        }
+
+        .custom-table tr:hover {
+            background-color: #e8f5e9; 
+        }
+
+   
+    .btn-success {
+        background-color: #9DC183;
+        border-color: #7CB368;
+        color: white;
+        padding: 8px 16px;
+        font-size: 14px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+        .btn-success:hover {
+            background-color: #82a464;
+            transform: scale(1.05); 
+        }
+
+    
+    .no-requests-text {
+        font-family: Arial, sans-serif;
+        font-size: 16px;
+        color: #888;
+        text-align: center;
+        margin-top: 20px;
+    }
+</style>

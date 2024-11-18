@@ -1,0 +1,50 @@
+﻿@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@model LeaveModel
+
+<div class="container">
+    <h2>Employee Leave Management</h2>
+
+    <form asp-action="FilterLeaves" method="post">
+        <div class="form-group">
+            <label for="StartDate">Start Date</label>
+            <input type="text" id="StartDate" name="StartDate" class="form-control" placeholder="dd/MM/yyyy" value="@Model.StartDate" />
+        </div>
+        <div class="form-group">
+            <label for="EndDate">End Date</label>
+            <input type="text" id="EndDate" name="EndDate" class="form-control" placeholder="dd/MM/yyyy" value="@Model.EndDate" />
+        </div>
+        <button type="submit" class="btn btn-primary">Filter</button>
+    </form>
+
+    <h3>Leave List</h3>
+    <div>
+        @if (Model.Leaves.Any())
+        {
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Employee Name</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var leave in Model.Leaves)
+                    {
+                        <tr>
+                            <td>@leave.EmployeeName</td>
+                            <td>@leave.StartDate</td>
+                            <td>@leave.EndDate</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p>No leaves found for the selected date range.</p>
+        }
+    </div>
+</div>

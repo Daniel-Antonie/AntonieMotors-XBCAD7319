@@ -8,16 +8,18 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
     <link href="~/css/styles.css" rel="stylesheet" />
     <style>
-        /* Sidebar styling */
+
+       
         #sidebar-wrapper {
-            background-color: #9DC183; /* Dark sidebar color */
-            color: #fff;
+            background-color: #9DC183; 
+            color: white;
             height: 100vh;
             position: fixed;
             width: 250px;
+            overflow-y: auto; 
         }
 
-        /* Business logo and name styling */
+     
         .sidebar-logo {
             text-align: center;
             padding: 20px;
@@ -27,40 +29,38 @@
             .sidebar-logo img {
                 width: 100px;
                 height: 100px;
-                /*   border-radius: 90%;  makes trhe boirder circle */
                 object-fit: cover;
             }
 
             .sidebar-logo h3 {
-                color: black; /* Set text color to white for better contrast */
+                color: black;
                 font-size: 1.25rem;
                 margin-top: 10px;
                 font-weight: bold;
             }
 
-        /* Set the text color to white for all menu items */
+      
         #sidebar-wrapper .list-group-item {
             background-color: #9DC183;
-            color: black; /* Text color set to white */
+            color: black;
             border: none;
         }
 
-            /* Change color for hover and active items */
             #sidebar-wrapper .list-group-item:hover,
             #sidebar-wrapper .list-group-item:focus {
                 background-color: #1abc9c;
-                color: #fff;
+                color: white;
             }
 
-            /* Style the "Delete Account" item to keep it red */
+           
             #sidebar-wrapper .list-group-item.text-danger {
-                color: #e74c3c; /* Red color */
+                color: #e74c3c;
             }
 
                 #sidebar-wrapper .list-group-item.text-danger:hover,
                 #sidebar-wrapper .list-group-item.text-danger:focus {
                     background-color: #e74c3c;
-                    color: #fff;
+                    color: white;
                 }
 
         #sidebar-wrapper .sidebar-heading {
@@ -70,45 +70,49 @@
             color: white;
         }
 
-
-        .border-right {
-            border-right: 2px solid #1abc9c;
+     
+        #page-content-wrapper {
+            margin-left: 250px;
+            padding: 20px;
+            width: calc(100% - 250px); 
+            min-height: 100vh;
+            background-color: #F5F5DC;
         }
 
-        /* Icon styling */
+        body {
+            background-color: #F5F5DC;
+            margin: 0;
+        }
+
+        .container-fluid {
+            flex-grow: 1;
+            background-color: #F5F5DC;
+        }
+
+        footer {
+            background-color: #9DC183;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+            position: fixed;
+            bottom: 0;
+            left: 250px;
+            width: calc(100% - 250px);
+        }
+
+       
         .list-group-item i {
             margin-right: 10px;
-        }
-
-        /* My Profile section styling */
-        .profile-section {
-            margin-top: 20px;
-            padding-top: 10px;
-            border-top: 1px solid #fff;
-        }
-
-            .profile-section h5 {
-                padding: 10px;
-                font-size: 1.25rem;
-            }
-
-        /* Page Content */
-        #page-content-wrapper {
-            background-color: #f8f9fa; /* Light background for content */
-            margin-left: 250px;
-            height: 100vh;
-            padding: 20px;
         }
     </style>
 </head>
 <body>
     <div class="d-flex" id="wrapper">
-        <!-- Sidebar -->
+     
         <div id="sidebar-wrapper">
-            <!-- Business logo and name -->
+           
             <div class="sidebar-logo">
                 <img src="~/Images/amlogo.jpg" alt="Business Logo" />
-                <h3>Antonie Motors</h3>
             </div>
 
             <div class="sidebar-heading">Client Dashboard</div>
@@ -119,9 +123,9 @@
                 <a href="@Url.Action("QuoteGeneratorCust", "Customer")" class="list-group-item list-group-item-action">
                     <i class="fas fa-file-invoice-dollar"></i> Quote Generator
                 </a>
-                <a href="@Url.Action("ViewCarStatus", "Customer")" class="list-group-item list-group-item-action">
+               @*  <a href="@Url.Action("ViewCarStatus", "Customer")" class="list-group-item list-group-item-action">
                     <i class="fas fa-users"></i> View Car Status
-                </a>
+                </a> *@
                 <a href="@Url.Action("ServiceHistory", "Customer")" class="list-group-item list-group-item-action">
                     <i class="fas fa-car"></i> View Service History
                 </a>
@@ -132,17 +136,14 @@
                     <i class="fas fa-chart-line"></i> Analytics
                 </a> *@
             </div>
-            <hr class="my-3"> <!-- Divider line -->
+            <hr class="my-1"> <!-- Divider line -->
             <div class="sidebar-heading">My Profile</div>
             <div class="list-group list-group-flush">
-                <a href="#" class="list-group-item list-group-item-action">
+                <a href="@Url.Action("Account", "Customer")" class="list-group-item list-group-item-action">
+                    <i class="fas fa-user"></i>Account Settings
+                </a>
+                <a href="@Url.Action("Logout", "Customer")" class="list-group-item list-group-item-action">
                     <i class="fas fa-sign-out-alt"></i> Logout
-                </a>
-                <a href="#" class="list-group-item list-group-item-action">
-                    <i class="fas fa-key"></i> Change Password
-                </a>
-                <a href="#" class="list-group-item list-group-item-action text-danger">
-                    <i class="fas fa-trash-alt"></i> Delete Account
                 </a>
             </div>
         </div>

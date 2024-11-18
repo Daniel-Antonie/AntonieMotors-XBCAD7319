@@ -4,6 +4,9 @@ using Firebase.Database;
 using Firebase.Database.Query;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+using System.Globalization;
 using System.Net;
 
 namespace AntonieMotors_XBCAD7319.Controllers
@@ -32,8 +35,9 @@ namespace AntonieMotors_XBCAD7319.Controllers
             return View();
         }
 
-        public IActionResult QuoteGenerator()
+        public async Task<IActionResult> QuoteGenerator()
         {
+            await fetchQuoteRequests();
             return View();
         }
 
@@ -74,7 +78,7 @@ namespace AntonieMotors_XBCAD7319.Controllers
 
                 // Filter customers by managerId if applicable
                 var filteredCustomers = customers
-                  
+
                     .Select(c => new CustomerModel
                     {
                         CustomerName = c.Object.CustomerName,
@@ -86,7 +90,7 @@ namespace AntonieMotors_XBCAD7319.Controllers
                     })
                     .ToList();
 
-               // Console.WriteLine($"Filtered {filteredCustomers.Count} customers for ManagerID: {managerId}");
+                // Console.WriteLine($"Filtered {filteredCustomers.Count} customers for ManagerID: {managerId}");
                 return filteredCustomers;
             }
             catch (Exception ex)
@@ -96,8 +100,6 @@ namespace AntonieMotors_XBCAD7319.Controllers
                 return new List<CustomerModel>();
             }
         }
-
-
 
 
         public async Task<IActionResult> VehicleManagement(string searchQuery = "")
@@ -170,11 +172,11 @@ namespace AntonieMotors_XBCAD7319.Controllers
             }
         }
 
+     
 
-
-
-        public IActionResult InventoryManagement()
+        public async Task<IActionResult> InventoryManagement()
         {
+            await fetchInventory();
             return View();
         }
 
@@ -238,10 +240,7 @@ namespace AntonieMotors_XBCAD7319.Controllers
                 return new List<EmployeeModel>();
             }
         }
-
-
-
-    [HttpPost]
+        [HttpPost]
         public async Task<IActionResult> EditEmployee(EmployeeModel model, IFormFile ProfileImage)
         {
             string businessId = BusinessID.businessId;
@@ -263,7 +262,7 @@ namespace AntonieMotors_XBCAD7319.Controllers
                 existingEmployee.phone = model.phone;
                 existingEmployee.managerID = model.managerID;
 
-              
+
 
                 // Update the employee data in Firebase with the modified data
                 await _firebaseClient
@@ -306,12 +305,39 @@ namespace AntonieMotors_XBCAD7319.Controllers
             return View();
         }
 
-        public async Task<IActionResult> Services()
-        {
-            await getAllServices();
+        public async Task<IActionResult> Services(string searchQuery = "")
+{
+    try
+    {
+        // Fetch all services
+        var services = await FetchAllServicesAsync(BusinessID.businessId);
 
-            return View();
+        // Filter services if a search query is provided
+        if (!string.IsNullOrEmpty(searchQuery))
+        {
+            services = services.Where(service =>
+                service.Customer.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                service.Model.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                service.NumberPlate.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                service.Name.Contains(searchQuery, StringComparison.OrdinalIgnoreCase)
+            ).ToList();
         }
+
+        // Pass the services to the view using ViewBag
+        ViewBag.Services = services;
+
+        return View();
+    }
+    catch (Exception ex)
+    {
+        // Log and handle errors
+        Console.WriteLine($"Error in Services method: {ex.Message}");
+        ViewBag.ErrorMessage = "An error occurred while fetching services.";
+        ViewBag.Services = null;
+        return View();
+    }
+}
+
 
         //fetches analytics data for services
         private async Task getServicesAnalytics()
@@ -327,7 +353,7 @@ namespace AntonieMotors_XBCAD7319.Controllers
                 //total service count
                 int serviceCount = services.Count();
 
-                ViewBag.ServiceCount = serviceCount;    
+                ViewBag.ServiceCount = serviceCount;
 
                 // Count services with status set to "Completed"
                 int completedServicesCount = services.Count(service =>
@@ -411,56 +437,34 @@ namespace AntonieMotors_XBCAD7319.Controllers
             }
         }
 
-        private async Task getAllServices()
+        private async Task<List<dynamic>> FetchAllServicesAsync(string businessId)
         {
             try
             {
-                var services = await _firebaseClient.Child($"Users/{BusinessID.businessId}/Services").OnceAsync<dynamic>();
-
-                if (services == null || !services.Any())
-                {
-                    ViewBag.Services = new List<dynamic>();
-                    return;
-                }
+                var services = await _firebaseClient.Child($"Users/{businessId}/Services").OnceAsync<dynamic>();
 
                 var serviceList = new List<dynamic>();
 
                 foreach (var service in services)
                 {
-
-                    // Fetching vehicle data
                     string vehicleModel = await fetchVehicleModel((string)service.Object.vehicleID);
                     string vehicleNumberPlate = await fetchVehicleNumPlate((string)service.Object.vehicleID);
                     string custName = await fetchCustName((string)service.Object.custID);
 
-                    // Initialize date variables with "N/A"
-                    string dateTakenIn = "N/A";
-                    string dateReturned = "N/A";
+                    string dateTakenIn = service.Object.dateReceived?.time != null
+                        ? DateTimeOffset.FromUnixTimeMilliseconds((long)service.Object.dateReceived.time).ToString("dd MMMM yyyy")
+                        : "N/A";
 
-                    // Handle dateTakenIn if it's not null and has a time field (Unix timestamp)
-                    if (service.Object.dateReceived != null && service.Object.dateReceived.time != null)
-                    {
-                        long dateTakenInLong = (long)service.Object.dateReceived.time; // Get Unix timestamp
-                        DateTime dateTakenInDateTime = DateTimeOffset.FromUnixTimeMilliseconds(dateTakenInLong).DateTime; // Convert to DateTime
-                        dateTakenIn = dateTakenInDateTime.ToString("dd MMMM yyyy");
-                    }
+                    string dateReturned = service.Object.dateReturned?.time != null
+                        ? DateTimeOffset.FromUnixTimeMilliseconds((long)service.Object.dateReturned.time).ToString("dd MMMM yyyy")
+                        : "N/A";
 
-                    // Handle dateReturned if it's not null and has a time field (Unix timestamp)
-                    if (service.Object.dateReturned != null && service.Object.dateReturned.time != null)
-                    {
-                        long dateReturnedLong = (long)service.Object.dateReturned.time; // Get Unix timestamp
-                        DateTime dateReturnedDateTime = DateTimeOffset.FromUnixTimeMilliseconds(dateReturnedLong).DateTime; // Convert to DateTime
-                        dateReturned = dateReturnedDateTime.ToString("dd MMMM yyyy");
-                    }
-
-                    // Handling totalCost
                     string totalCost = $"R {service.Object.totalCost}";
 
-                    // Add the service to the list
                     serviceList.Add(new
                     {
-                        Name = (string)service.Object.name, // Cast name to string
-                        Status = (string)service.Object.status, // Cast status to string
+                        Name = (string)service.Object.name,
+                        Status = (string)service.Object.status,
                         Customer = custName,
                         Model = vehicleModel,
                         NumberPlate = vehicleNumberPlate,
@@ -470,16 +474,15 @@ namespace AntonieMotors_XBCAD7319.Controllers
                     });
                 }
 
-
-                // Set services in ViewBag
-                ViewBag.Services = serviceList;
-                Console.WriteLine($"Services fetched: {serviceList.Count}");
+                return serviceList;
             }
             catch (Exception e)
             {
-                ViewBag.ErrorMessage = $"Error: {e.Message}";
+                Console.WriteLine($"Error fetching services: {e.Message}");
+                return new List<dynamic>();
             }
         }
+
 
         private async Task<string> fetchVehicleNumPlate(dynamic vehicleID)
         {
@@ -530,5 +533,342 @@ namespace AntonieMotors_XBCAD7319.Controllers
 
             return fullName;
         }
+
+        private async Task fetchQuoteRequests()
+        {
+            try
+            {
+                // Retrieve all quote requests stored under the business ID
+                var quoteRequestsResponse = await _firebaseClient
+                    .Child($"Users/{BusinessID.businessId}/QuoteRequests")
+                    .OnceAsync<QuoteRequestModel>();
+
+                var quoteRequestsList = new List<dynamic>();
+
+                // Iterate over the results and prepare the data for display
+                foreach (var quoteRequest in quoteRequestsResponse)
+                {
+                    quoteRequestsList.Add(new
+                    {
+                        CustomerName = quoteRequest.Object.CustomerName,
+                        CarMake = quoteRequest.Object.CarMake,
+                        CarModel = quoteRequest.Object.CarModel,
+                        Description = quoteRequest.Object.Description,
+                        PhoneNumber = quoteRequest.Object.PhoneNumber,
+                        RequestId = quoteRequest.Key // Firebase unique key
+                    });
+                }
+
+                // Pass the data to the view
+                ViewBag.quoteRequests = quoteRequestsList;
+            }
+            catch (Exception e)
+            {
+                // Handle and log errors
+                ViewBag.ErrorMessage = $"Error: {e.Message}";
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteQuoteRequest(string requestId)
+        {
+            try
+            {
+                // Delete the quote request from Firebase
+                await _firebaseClient
+                    .Child($"Users/{BusinessID.businessId}/QuoteRequests/{requestId}")
+                    .DeleteAsync();
+
+                TempData["SuccessMessage"] = "Quote request marked as done.";
+            }
+            catch (Exception e)
+            {
+                TempData["ErrorMessage"] = $"Error: {e.Message}";
+            }
+
+            // Refresh the list of quote requests
+            await fetchQuoteRequests();
+            return RedirectToAction("QuoteGenerator");
+        }
+
+        private async Task fetchInventory()
+        {
+            try
+            {
+                var inventoryResponse = await _firebaseClient.Child($"Users/{BusinessID.businessId}/parts").OnceAsync<dynamic>();
+
+                var inventoryList = new List<dynamic>();
+
+                foreach (var part in inventoryResponse)
+                {
+                    inventoryList.Add(new
+                    {
+                        partName = part.Object.partName,
+                        costPrice = part.Object.costPrice,
+                        stockCount = part.Object.stockCount
+                    });
+                }
+
+                ViewBag.inventory = inventoryList;
+            }
+            catch (Exception e)
+            {
+                ViewBag.ErrorMessage = $"Error: {e.Message}";
+            }
+        }
+
+        public IActionResult Logout()
+        {
+            // Log out the user
+            Response.Cookies.Delete(".AspNetCore.Identity.Application");
+
+            // Redirect to a confirmation page or homepage
+            return RedirectToAction("Index", "Home");
+        }
+
+        public async Task<IActionResult> SendPasswordResetEmail()
+        {
+            await _authProvider.SendPasswordResetEmailAsync(BusinessID.email);
+            Console.WriteLine("Email sent successfully");
+            return RedirectToAction("Account", "Admin");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteAccount()
+        {
+            try
+            {
+                string userId = BusinessID.userId;
+                string businessId = BusinessID.businessId;
+
+                // Delete customer data from Firebase
+                await _firebaseClient.Child($"Users/{businessId}/Employees/{userId}").DeleteAsync();
+
+                return Logout();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting account: {ex.Message}");
+                TempData["ErrorMessage"] = "Unable to delete account. Please try again.";
+                return RedirectToAction("Account", "Admin");
+            }
+        }
+
+        public IActionResult Account()
+        {
+            return View();
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        #region Leave Management with Date Filtering
+
+        [HttpGet]
+        public async Task<IActionResult> LeaveManagement()
+        {
+            // Initialize the model with all approved leaves
+            var model = new LeaveModel
+            {
+                Leaves = await GetAllApprovedLeavesAsync(businessId)
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> FilterLeaves(string startDate, string endDate)
+        {
+            var model = new LeaveModel
+            {
+                StartDate = startDate,
+                EndDate = endDate
+            };
+
+            Console.WriteLine($"Filtering leaves from {startDate} to {endDate}");
+
+            // Try parsing the start and end dates
+            if (TryParseDate(startDate, out var parsedStartDate) && TryParseDate(endDate, out var parsedEndDate))
+            {
+                // Filter leaves based on the date range
+                model.Leaves = await GetLeavesWithinRangeAsync(businessId, parsedStartDate, parsedEndDate);
+
+                // If leaves are found, log it, otherwise show message
+                if (model.Leaves.Any())
+                {
+                    Console.WriteLine($"{model.Leaves.Count} leaves found in the selected range.");
+                }
+                else
+                {
+                    Console.WriteLine("No leaves found in the selected date range.");
+                    TempData["InfoMessage"] = "No leave requests found within the selected date range.";
+                }
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Invalid date format. Please provide valid start and end dates.";
+            }
+
+            return View("LeaveManagement", model);
+        }
+
+        // Fetch all approved leaves
+        private async Task<List<LeaveDetail>> GetAllApprovedLeavesAsync(string businessId)
+        {
+            var employeeLeaves = new List<LeaveDetail>();
+
+            try
+            {
+                var employees = await _firebaseClient
+                    .Child($"Users/{businessId}/Employees")
+                    .OnceAsync<Dictionary<string, object>>();
+
+                Console.WriteLine($"Retrieved {employees.Count} employees from Firebase.");
+
+                foreach (var employee in employees)
+                {
+                    Console.WriteLine($"Processing employee: {employee.Key}");
+                    Console.WriteLine($"Employee Data: {JsonConvert.SerializeObject(employee.Object)}");
+
+                    // Attempt to retrieve ApprovedLeave
+                    if (employee.Object.TryGetValue("ApprovedLeave", out var approvedLeaveObj))
+                    {
+                        Console.WriteLine($"Found ApprovedLeave for employee {employee.Key}");
+
+                        if (approvedLeaveObj is JObject approvedLeaveJObject)
+                        {
+                            // Deserialize JObject into a Dictionary
+                            var approvedLeaves = approvedLeaveJObject.ToObject<Dictionary<string, object>>();
+                            foreach (var leave in approvedLeaves.Values)
+                            {
+                                if (leave is JObject leaveDataJObject)
+                                {
+                                    var leaveData = leaveDataJObject.ToObject<Dictionary<string, string>>();
+                                    if (leaveData != null &&
+                                        leaveData.TryGetValue("startDate", out var startDate) &&
+                                        leaveData.TryGetValue("endDate", out var endDate) &&
+                                        leaveData.TryGetValue("userName", out var userName))
+                                    {
+                                        if (TryParseDate(endDate, out var parsedEndDate) && parsedEndDate >= DateTime.Now)
+                                        {
+                                            employeeLeaves.Add(new LeaveDetail
+                                            {
+                                                EmployeeName = userName,
+                                                StartDate = startDate,
+                                                EndDate = endDate
+                                            });
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine($"ApprovedLeave data could not be parsed for employee {employee.Key}: {approvedLeaveObj.GetType()}");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Employee {employee.Key} has no ApprovedLeave data.");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error retrieving approved leaves: {ex.Message}");
+            }
+
+            return employeeLeaves;
+        }
+
+
+        // Parse date with multiple formats
+        private bool TryParseDate(string date, out DateTime parsedDate)
+        {
+            var formats = new[] { "dd/MM/yyyy", "MM/dd/yyyy", "yyyy-MM-dd" }; // Add more formats if necessary
+            return DateTime.TryParseExact(date, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsedDate);
+        }
+
+        // Fetch leaves within the specified date range
+        private async Task<List<LeaveDetail>> GetLeavesWithinRangeAsync(string businessId, DateTime startDate, DateTime endDate)
+        {
+            Console.WriteLine($"Fetching leaves within range: {startDate:dd/MM/yyyy} to {endDate:dd/MM/yyyy}");
+
+            // Retrieve all leaves
+            var allLeaves = await GetAllApprovedLeavesAsync(businessId);
+
+            if (!allLeaves.Any())
+            {
+                Console.WriteLine("No leaves were retrieved.");
+                return new List<LeaveDetail>();
+            }
+
+            Console.WriteLine($"{allLeaves.Count} total leaves retrieved.");
+
+            // Filter leaves based on the date range
+            var filteredLeaves = allLeaves.Where(leave =>
+                TryParseDate(leave.StartDate, out var leaveStartDate) &&
+                TryParseDate(leave.EndDate, out var leaveEndDate) &&
+                leaveStartDate <= endDate && leaveEndDate >= startDate) // Leave must overlap with the range
+                .ToList();
+
+            Console.WriteLine($"{filteredLeaves.Count} leaves found after filtering.");
+
+            return filteredLeaves;
+        }
+
+        #endregion
     }
+
+
 }
